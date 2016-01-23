@@ -1,4 +1,4 @@
-rdb-fullstack
+Fullstack Development Course
 =============
 
-Common code for the Relational Databases and Full Stack Fundamentals courses
+Drew's repo for all examples/projects from Udacity's Fullstack Engineering Course
