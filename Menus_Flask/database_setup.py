@@ -23,15 +23,19 @@ class MenuItem(Base):
     description = Column(String(250))
     price = Column(String(8))
     course = Column(String(250))
-
     restaurant_id = Column(Integer, ForeignKey('restaurant.id')) #Creates foreign key relationship
-
     restaurant = relationship(Restaurant) #Gives access to the restaurant instance (?)
 
-
-
-
-
+    @property
+    def serialize(self):
+        #Returns object data in easily serializeable format
+        return {
+            'name' : self.name,
+            'description' : self.description,
+            'id' : self.id,
+            'price' : self.price,
+            'course' : self.course,
+        }
 
 
 
