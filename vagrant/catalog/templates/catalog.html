@@ -1,10 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<head></head>
 
+<body>
+    <h1>Catalog</h1>
+
+    <div class="categories">
+        <h3>Categories</h3>
+        {% if not categories %}
+        <div class="noCategories">
+            <p>No categories available.</p>
+        </div>
+        {% else %}
+        <div class="categoriesList">
+            <ul>
+                {% for category in categories %}
+                <li>{{ category.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    <div class="latestItems">
+        <h3>Latest Items</h3>
+        {% if not latest_items %}
+        <div class="noLatestItems">
+            <p>No items have been recently updated</p>
+        </div>
+        {% else %}
+        <div class="latestItemsList">
+            <ul>
+                {% for item in latest_items %}
+                <li>{{ item.name }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>

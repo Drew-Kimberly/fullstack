@@ -16,8 +16,7 @@ def catalog():
     categories = session.query(Category).all()
     latest_items = session.query(Item).all()
 
-    return("Hello World")
-    #return render_template('catalog.html', categories=categories, latest_items=latest_items)
+    return render_template('catalog.html', categories=categories, latest_items=latest_items)
 
 
 if __name__ == '__main__':
