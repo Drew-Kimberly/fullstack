@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+    <h1>Catalog</h1>
+
+    <h3>{{ item.name }}</h3>
+
+    <div class="itemDiv">
+        <form class="editItemForm" action="{{ url_for("editItem", item_id=item.item_id) }}" method="post">
+            <label for=name>Name</label>
+            <input type="text" class="nameInput" id="name" name="name" value="{{ item.name }}"/>
+            <br/>
+
+            <label for="description">Description</label>
+            <textarea class="descriptionTextarea" id="description"
+                      name="description">{{ item.description }}</textarea>
+            <br/>
+
+            <label for="category">Category</label>
+            <input type="text" list="category" name="category" id="category" value="{{ item.category.name }}">
+            <datalist class="categorySelect">
+            {% for category in categories %}
+                {% if category %}
+                    <option value="{{ item.category_id }}">{{ item.category.name }}</option>
+                {% endif %}
+            {% endfor %}
+            </datalist>
+            <br/>
+
+            <input type="submit" value="Edit" class="editItemSubmit"/>
+            <a href="{{ url_for("catalog") }}">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

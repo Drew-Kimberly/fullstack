@@ -1,0 +1,8 @@
+.categories {
+    display: inline-block;
+    padding-right: 6em;
+}
+
+.latestItems {
+    display: inline-block;
+}
