@@ -7,7 +7,9 @@
     <h3>{{ item.name }}</h3>
 
     <div class="itemDiv">
-        <form class="editItemForm" action="{{ url_for("editItem", item_id=item.item_id) }}" method="post">
+        <form class="editItemForm" action="{{ url_for("editItem",
+                item_id=item.item_id, category_id = item.category.category_id) }}" method="post">
+
             <label for=name>Name</label>
             <input type="text" class="nameInput" id="name" name="name" value="{{ item.name }}"/>
             <br/>
@@ -28,8 +30,8 @@
             </datalist>
             <br/>
 
-            <input type="submit" value="Edit" class="editItemSubmit"/>
-            <a href="{{ url_for("catalog") }}">Cancel</a>
+            <input type="submit" value="Save" class="editItemSubmit"/>
+            <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=item.category.category_id) }}">Cancel</a>
         </form>
     </div>
 </body>

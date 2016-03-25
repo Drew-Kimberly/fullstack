@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<head></head>
 <body>
+    <h1>Catalog</h1>
+    <a href="{{ url_for("catalog") }}">Return to List</a>
 
+    <h3>{{ item.name }}</h3>
+    <div class="itemDiv">
+        <p class="itemDescription">{{ item.description }}</p>
+        <div class="itemCategory">
+            Category: <a href="#">{{ item.category.name }}</a>
+        </div>
+    </div>
+    <div class="editDeleteOptions">
+        <a href="{{ url_for("editItem", category_id=item.category.category_id,item_id=item.item_id) }}">Edit</a>
+        <a href="{{ url_for("deleteItem", category_id=item.category.category_id, item_id=item.item_id) }}">Delete</a>
+    </div>
 </body>
 </html>

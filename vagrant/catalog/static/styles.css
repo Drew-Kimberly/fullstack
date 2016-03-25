@@ -4,5 +4,6 @@
 }
 
 .latestItems {
+    position: absolute;
     display: inline-block;
 }

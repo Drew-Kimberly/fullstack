@@ -5,13 +5,21 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 
+'''
+I didn't like wiping my data when recreating my database every time a schema update was needed,
+so I began using Alembic, an open sourced db migration tool built on top of SQLAlchemy.
+Really cool and easy, especially with the autogeneration feature!
+Docs can be found here: https://alembic.readthedocs.org/en/latest/
+'''
+
+
 Base = declarative_base()
 
 
 class Category(Base):
     __tablename__ = 'category'
 
-    name = Column(String(80), nullable=False)
+    name = Column(String(80), nullable=False, unique=True)
     category_id = Column(Integer, primary_key=True)
 
 
@@ -28,13 +36,12 @@ class Item(Base):
 
     @property
     def serialize(self):
-        #Returns object data in easily serializeable format
+        # Returns object data in easily serializeable format
         return {
-            'name' : self.name,
-            'description' : self.description,
-            'item_id' : self.item_id,
+            'name': self.name,
+            'description': self.description,
+            'item_id': self.item_id,
         }
-
 
 
 engine = create_engine('postgresql:///catalog')

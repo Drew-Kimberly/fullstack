@@ -37,7 +37,7 @@
             <ul>
                 {% for item in latest_items %}
                 <li>
-                    <a href="{{ url_for("editItem", item_id=item.item_id) }}">{{ item.name }}</a>
+                    <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=item.category.category_id) }}">{{ item.name }}</a>
                 </li>
                 {% endfor %}
             </ul>

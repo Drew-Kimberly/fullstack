@@ -8,8 +8,10 @@ app = Flask(__name__)
 engine = create_engine('postgresql:///catalog')
 Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind = engine)
+DBSession = sessionmaker(bind=engine)
 session = DBSession()
+""":type: sqlalchemy.orm.Session"""
+
 
 @app.route('/')
 @app.route('/catalog')
@@ -24,16 +26,19 @@ def catalog():
 def newItem():
     if request.method == 'POST':
         if request.form["name"] != "" and request.form["category"] != "":
-            category = Category(name = request.form["category"])
-            #Check for existing category name in database
-            if not session.query(Category).filter_by(name=category.name).first():
+
+            # Check for existing category name in database
+            if not session.query(Category).filter_by(name=request.form["category"]).first():
+                category = Category(name=request.form["category"])
                 session.add(category)
-                session.flush() #Flush change to the database in order to assign category_id
+                session.flush()  # Flush change to the database in order to assign category_id
+            else:
+                category = session.query(Category).filter_by(name=request.form["category"]).one()
 
             newItem = Item(
-                name = request.form["name"],
-                description = request.form["description"],
-                category_id = category.category_id
+                name=request.form["name"],
+                description=request.form["description"],
+                category_id=category.category_id
             )
             session.add(newItem)
             session.commit()
@@ -44,17 +49,71 @@ def newItem():
         return render_template('newitem.html', categories=categories)
 
 
-@app.route('/item/<int:item_id>')
-def viewItem(item_id):
-    return "Item view when a user is not authenticated."
+@app.route('/categories/<int:category_id>/items/<int:item_id>')
+def viewItem(item_id, category_id):
+    item = session.query(Item).filter_by(item_id=item_id).one()
+    return render_template("viewitem.html", item=item)
+
+
+@app.route('/categories/<int:category_id>/items/<int:item_id>/edit', methods=['GET', 'POST'])
+def editItem(item_id, category_id):
+    item = session.query(Item).filter_by(item_id=item_id).one()
+    category = session.query(Category).filter_by(category_id=category_id).one()
+
+    if request.method == 'POST':
+
+        # Update information in database
+        if request.form["name"] != "" and request.form["category"] != "":
+
+            # Check if category changed
+            if request.form["category"] != category.name:
+
+                # Check if new category is existing category
+                if not session.query(Category).filter_by(name=request.form["category"]).first():
+                    category = Category(name=request.form["category"])
+                    session.add(category)  # Add new category to DB
+                    session.flush()  # Flush change to the database in order to assign category_id
+                else:
+                    category = session.query(Category).filter_by(name=request.form["category"]).one()
+
+                # Assign the item's new category ID
+                item.category_id = category.category_id
+
+            item.name = request.form["name"]
+            item.description = request.form["description"]
+
+            session.add(item)
+            session.commit()
+
+        # Return to the view item page
+        return redirect(url_for('viewItem', item_id=item.item_id, category_id=item.category.category_id))
+    else:
+        # Render edit item page on GET request
+        return render_template("edititem.html", item=item)
+
+
+@app.route('/categories/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
+def deleteItem(item_id, category_id):
+    item = session.query(Item).filter_by(item_id=item_id).one()
+    if request.method == "POST":
+        # Delete the item
+        session.delete(item)
+        session.commit()
+
+        return redirect(url_for('catalog'))
+    else:
+        # Render delete item page on GET request
+        return render_template("deleteitem.html", item=item)
 
 
 @app.route('/categories/<int:category_id>')
-def catalogCategory(category_id):
-    return "Lists all items within a given category"
+def viewCategory(category_id):
+    category = session.query(Category).filter_by(category_id=category_id).one()
+    items = session.query(Item).filter_by(category_id=category_id).all()
+    return render_template("viewcategory.html", category, items)
 
 
-@app.route('/categories/new') #Is this needed?
+@app.route('/categories/new')  # Is this needed?
 def newCategory():
     return "Form to add a new category into the db."
 
@@ -69,28 +128,6 @@ def deleteCategory(category_id):
     return "Delete an exisiting category here"
 
 
-@app.route('/categories/<int:category_id>/items/<int:item_id>')
-def catalogItem(category_id, item_id):
-    return "Lists the description of an item."
-
-
-@app.route('/item/<int:item_id>/edit', methods=['GET', 'POST'])
-@app.route('/categories/<int:category_id>/items/<int:item_id>/edit', methods=['GET', 'POST'])
-def editItem(item_id, category_id=None):
-    item = session.query(Item).filter_by(item_id = item_id).one()
-
-    if request.method == 'POST':
-        return "Form to edit an exisiting item"
-    else:
-        return render_template("edititem.html", item=item)
-
-
-
-
-@app.route('/categories/<int:category_id>/items/<int:item_id>/delete')
-def deleteItem(category_id, item_id):
-    return "Form to delete an existing item"
-
 if __name__ == '__main__':
     app.debug = True
-    app.run(host = '0.0.0.0', port = 8000)
+    app.run(host='0.0.0.0', port=8000)

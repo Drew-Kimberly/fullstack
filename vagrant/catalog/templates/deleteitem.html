@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
 </head>
 <body>
+    <h1>Are you sure you want to delete {{ item.name }}?</h1>
 
+    <form action="{{ url_for('deleteItem',
+            item_id=item.item_id, category_id=item.category.category_id) }}" method="post">
+
+        <input type="submit" value="Yes, I'm sure">
+        <p>
+            <a href="{{ url_for('viewItem', item_id=item.item_id, category_id=item.category.category_id) }}">
+                No, go back
+            </a>
+        </p>
+    </form>
 </body>
 </html>
