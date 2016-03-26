@@ -12,7 +12,7 @@
             Category: <a href="#">{{ item.category.name }}</a>
         </div>
     </div>
-    <div class="editDeleteOptions">
+    <div class="itemOptions">
         <a href="{{ url_for("editItem", category_id=item.category.category_id,item_id=item.item_id) }}">Edit</a>
         <a href="{{ url_for("deleteItem", category_id=item.category.category_id, item_id=item.item_id) }}">Delete</a>
     </div>

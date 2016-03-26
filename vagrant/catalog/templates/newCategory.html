@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+    <h1>Catalog</h1>
+
+    <h3>New Category</h3>
+
+    <div class="newCategoryDiv">
+        <form class="newCategoryForm" action="{{ url_for("newCategory") }}" method="post">
+            <label for=name>Name</label>
+            <input type="text" class="nameInput" id="name" name="name"/>
+
+            <input type="submit" value="Submit" class="newCategorySubmit"/>
+            <a href="{{ url_for("catalog") }}">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

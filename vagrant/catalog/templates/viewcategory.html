@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head></head>
+<body>
+    <h1>Catalog</h1>
+    <a href="{{ url_for("catalog") }}">Return to List</a>
+
+    <h3>{{ category.name }}</h3>
+    <a href="{{ url_for("editCategory", category_id=category.category_id) }}">Edit</a>
+
+    <div class="categoryDiv">
+        <div class="categoryItems">
+        {% if not items %}
+        <div class="noCategoryItems">
+            <p>There are no items associated with this category</p>
+        </div>
+        {% else %}
+        <div class="categoryItemsList">
+            <ul>
+                {% for item in items %}
+                <li>
+                    <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=category.category_id) }}">
+                        {{ item.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        </div>
+    </div>
+    <div class="categoryOptions">
+        <a href="{{ url_for("newItem", category_id=category.category_id) }}">Add Item</a>
+        <a href="{{ url_for("deleteCategory", category_id=category.category_id) }}">Delete Category</a>
+    </div>
+</body>
+</html>

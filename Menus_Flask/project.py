@@ -13,7 +13,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind = engine)
 session = DBSession()
 
-@app.route('/') #Decorators that wrap below function in the app.route() function
+@app.route('/') # Decorators that wrap below function in the app.route() function
 @app.route('/restaurants/<int:restaurant_id>/') #Passed in via the restaurantMenu function param
 def restaurantMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()

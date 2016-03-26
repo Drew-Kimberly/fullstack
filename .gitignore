@@ -4,3 +4,4 @@ __pycache__/
 *$py.class
 vagrant/.vagrant
 Intro_To_DB/forum/q
+*alembic*

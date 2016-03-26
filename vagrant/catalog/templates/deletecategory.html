@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Are you sure you want to delete {{ category.name }}?</h1>
+    <p><i>This will delete <b>all</b> items associated with this category!</i></p>
+
+    <form action="{{ url_for('deleteCategory', category_id=category.category_id) }}" method="post">
+
+        <input type="submit" value="Yes, I'm sure">
+        <p>
+            <a href="{{ url_for('viewCategory', category_id=category.category_id) }}">
+                No, go back
+            </a>
+        </p>
+    </form>
+</body>
+</html>

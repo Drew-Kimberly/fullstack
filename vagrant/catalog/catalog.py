@@ -23,7 +23,8 @@ def catalog():
 
 
 @app.route('/item/new', methods=['GET', 'POST'])
-def newItem():
+@app.route('/categories/<int:category_id>/new', methods=['GET', 'POST'])
+def newItem(category_id=None):
     if request.method == 'POST':
         if request.form["name"] != "" and request.form["category"] != "":
 
@@ -33,7 +34,7 @@ def newItem():
                 session.add(category)
                 session.flush()  # Flush change to the database in order to assign category_id
             else:
-                category = session.query(Category).filter_by(name=request.form["category"]).one()
+                category = session.query(Category).filter_by(name=request.form["category"]).first()
 
             newItem = Item(
                 name=request.form["name"],
@@ -51,14 +52,14 @@ def newItem():
 
 @app.route('/categories/<int:category_id>/items/<int:item_id>')
 def viewItem(item_id, category_id):
-    item = session.query(Item).filter_by(item_id=item_id).one()
+    item = session.query(Item).filter_by(item_id=item_id).first()
     return render_template("viewitem.html", item=item)
 
 
 @app.route('/categories/<int:category_id>/items/<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(item_id, category_id):
-    item = session.query(Item).filter_by(item_id=item_id).one()
-    category = session.query(Category).filter_by(category_id=category_id).one()
+    item = session.query(Item).filter_by(item_id=item_id).first()
+    category = session.query(Category).filter_by(category_id=category_id).first()
 
     if request.method == 'POST':
 
@@ -74,7 +75,7 @@ def editItem(item_id, category_id):
                     session.add(category)  # Add new category to DB
                     session.flush()  # Flush change to the database in order to assign category_id
                 else:
-                    category = session.query(Category).filter_by(name=request.form["category"]).one()
+                    category = session.query(Category).filter_by(name=request.form["category"]).first()
 
                 # Assign the item's new category ID
                 item.category_id = category.category_id
@@ -94,7 +95,7 @@ def editItem(item_id, category_id):
 
 @app.route('/categories/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
 def deleteItem(item_id, category_id):
-    item = session.query(Item).filter_by(item_id=item_id).one()
+    item = session.query(Item).filter_by(item_id=item_id).first()
     if request.method == "POST":
         # Delete the item
         session.delete(item)
@@ -108,24 +109,67 @@ def deleteItem(item_id, category_id):
 
 @app.route('/categories/<int:category_id>')
 def viewCategory(category_id):
-    category = session.query(Category).filter_by(category_id=category_id).one()
+    category = session.query(Category).filter_by(category_id=category_id).first()
     items = session.query(Item).filter_by(category_id=category_id).all()
-    return render_template("viewcategory.html", category, items)
+    return render_template("viewcategory.html", category=category, items=items)
 
 
-@app.route('/categories/new')  # Is this needed?
+@app.route('/categories/new', methods=['GET', 'POST'])
 def newCategory():
-    return "Form to add a new category into the db."
+    if request.method == 'POST':
+        category_name = request.form["name"]
+        # Validate the input
+        if category_name == "" or session.query(Category).filter_by(name=category_name).first():
+            return render_template('newcategory.html')
+        else:
+            session.add(Category(name=category_name))
+            session.commit()
+            return redirect(url_for("catalog"))
+    else:
+        # Render add catalog page on GET request
+        return render_template('newcategory.html')
 
 
-@app.route('/categories/<int:category_id>/edit')
+@app.route('/categories/<int:category_id>/edit', methods=['GET', 'POST'])
 def editCategory(category_id):
-    return "Form to edit an existing category."
+    category = session.query(Category).filter_by(category_id=category_id).first()
+    if request.method == 'POST':
+        category_name = request.form["name"]
+
+        # Validate the input
+        if category_name == "" or \
+                        session.query(Category).filter_by(name=category_name).first() and \
+                        category.name != category_name:
+            return render_template('editcategory.html', category=category)
+        else:
+
+            # Don't go to DB if name hasn't changed
+            if category.name != category_name:
+                category.name = category_name
+                session.add(category)
+                session.commit()
+
+            return redirect(url_for("catalog"))
+    else:
+        # Render Edit Category page on GET
+        return render_template('editcategory.html', category=category)
 
 
-@app.route('/categories/<int:category_id>/delete')
+@app.route('/categories/<int:category_id>/delete', methods=['GET', 'POST'])
 def deleteCategory(category_id):
-    return "Delete an exisiting category here"
+    category = session.query(Category).filter_by(category_id=category_id).first()
+    if request.method == 'POST':
+        items = session.query(Item).filter_by(category_id=category_id).all()
+        if len(items) > 0:
+            for item in items:
+                session.delete(item)
+        session.delete(category)
+        session.commit()
+
+        return redirect(url_for("catalog"))
+    else:
+        # Render the delete category on GET
+        return render_template("deletecategory.html", category=category)
 
 
 if __name__ == '__main__':
