@@ -1,7 +1,7 @@
 import math
 
 
-class Movie():
+class Movie:
     """ This class provides a way to store movie related information"""
 
     def __init__(self, title, duration, year_released, storyline, poster_img_url, youtube_url):

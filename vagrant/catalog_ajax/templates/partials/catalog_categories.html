@@ -1,9 +1,9 @@
-<div class="col-sm-2">
+<div id="categories" class="col-sm-2">
     <ul>
-        {% for i in range(10) %}
+        {% for category in data %}
         <li>
-            <a id="{{ i }}" class="testLink" href="#">
-                Testing 123
+            <a id="{{ category.category_id }}" class="categoryLink" href="#">
+                {{ category.name }}
             </a>
         </li>
         {% endfor %}
