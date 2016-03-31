@@ -6,14 +6,15 @@ from database_setup import Base, Category, Item
 
 app = Flask(__name__)
 
-engine = create_engine('postgresql:///catalog')
+# engine = create_engine('mysql:///catalog')
+engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
 Base.metadata.bind = engine
 
-DBSession = sessionmaker(bind=engine)
-dbSession = DBSession()
+DBSessionMaker = sessionmaker(bind=engine)
+#dbSession = DBSession()
 """:type: sqlalchemy.orm.Session"""
 
-ajax_handler = AjaxHandler(dbSession)
+ajax_handler = AjaxHandler(DBSessionMaker)
 
 
 @app.route("/")

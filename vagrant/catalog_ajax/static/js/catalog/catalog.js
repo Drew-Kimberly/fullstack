@@ -7,6 +7,7 @@ var responseData;
 
 $(function() {
 
+    //Actions for on page render
     requestData = 
     {
         "action": "GetCategories"
@@ -23,23 +24,20 @@ $(function() {
     );
 
 
-    /*$('.testLink').click(function() {
+    //Add/Edit onclick logic
+    $('.btn-add').on('click', function(e) {
+        $('add-confirm').prop('id', $(this).data('add'));
+    });
+
+
+    //Add Category logic
+    $('#btnAddCategory').on('click', function(e) {
+        var name = "";
 
         requestData =
         {
-            "action": "testAjax",
-            "id": this.id,
-            "drew": "Drew is King of AJAX"
+            "action": "AddCategory",
+            "name": name
         };
-
-        JSONPost = JSON.stringify(requestData);
-
-        process(
-            JSONPost,
-            function(response) {
-                $('#items').append(response);
-            },
-            null
-        );
-    });*/
+    });
 });

@@ -3,10 +3,10 @@ from database_setup import Item, Category
 class AjaxHandler:
     '''This class...'''
 
-    def __init__(self, dbSession):
+    def __init__(self, dbSessionMaker):
         '''
         '''
-        self._dbSession = dbSession
+        self._dbSessionMaker = dbSessionMaker
         self._posted_data = None
         self.user_state = None
         self.action_context = None
@@ -15,8 +15,8 @@ class AjaxHandler:
     # Properties
 
     @property
-    def dbSession(self):
-        return self._dbSession
+    def dbSessionMaker(self):
+        return self._dbSessionMaker
 
     @property
     def posted_data(self):
@@ -53,12 +53,18 @@ class AjaxHandler:
         if not self.validateRequest():
             return None
 
+        # Create SQLAlchemy Session
+        dbSession = self.dbSessionMaker()
+
         # Determine request Action Type and execute respective logic
         if self.action_type == "testAjax":
+            dbSession.close()
             return self.posted_data["id"]
         elif self.action_type == "GetCategories":
-            categories = self.dbSession.query(Category).all()
+            categories = dbSession.query(Category).all()
             template_name = 'partials/catalog_categories.html'
+            dbSession.close()
             return [template_name, categories]
         else:
+            dbSession.close()
             return None

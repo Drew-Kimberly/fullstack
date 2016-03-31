@@ -1,5 +1,6 @@
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, func
+import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, func, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -29,8 +30,10 @@ class Item(Base):
     item_id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
     description = Column(Text, nullable=False)
-    created_on = Column(DateTime, server_default=func.now())
-    last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    # created_on = Column(DateTime, server_default=func.now()) # PostgreSQL
+    created_on = Column(TIMESTAMP, nullable=False)  # MySQL
+    # last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now()) #PostgreSQL
+    last_updated = Column(TIMESTAMP, nullable=False)  # MySQL
     category_id = Column(Integer, ForeignKey('category.category_id'))
     category = relationship(Category)
 
@@ -44,7 +47,8 @@ class Item(Base):
         }
 
 
-engine = create_engine('postgresql:///catalog')
+# engine = create_engine('postgresql:///catalog')
+engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
 if not database_exists(engine.url):
     create_database(engine.url)
 

@@ -15,14 +15,41 @@
 
     <div class="content">
         <div class="container-fluid">
-            <div class="row">
-                <div id="categories">
+
+            <div id="categoriesContainer" class="col-md-3">
+                <h2 id="categoriesHeader">
+                    Categories
+                    <button type="button" class="btn btn-success btn-circle btn-add"
+                        data-toggle="modal" data-target="#addCategory" data-add="btnAddCategory">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    </button>
+                </h2>
+
                 {% include "partials/catalog_categories.html" %}
-                </div>
-                <div id="items">
-                {% include "partials/catalog_items.html" %}
-                </div>
             </div>
+
+            <div id="itemsContainer" class="col-md-9">
+                {% include "partials/catalog_items.html" %}
+            </div>
+
+        </div>
+    </div>
+
+    <div id="addCategory" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                <i class="glyphicon glyphicon-remove"></i>
+            </button>
+            <h3>Add Category</h3>
+        </div>
+        <div class="modal-body">
+            {% include "partials/addcategory.html" %}
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-link" data-dismiss="modal">
+                Cancel
+            </button>
+            <button class="btn btn-success add-confirm">Add Category</button>
         </div>
     </div>
 </body>
