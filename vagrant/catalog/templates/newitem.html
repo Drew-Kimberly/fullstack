@@ -4,7 +4,11 @@
 <body>
     <h1>Catalog</h1>
 
+    {% if category_id %}
+    <h3>New Item in: <b>{{ categories[0].name }}</b></h3>
+    {% else %}
     <h3>New Item</h3>
+    {% endif %}
 
     <div class="newItemDiv">
         <form class="newItemForm" action="{{ url_for("newItem") }}" method="post">
@@ -17,14 +21,13 @@
             <br/>
 
             <label for="category">Category</label>
-            <input type="text" list="category" name="category" id="category">
-            <datalist class="categorySelect">
+            <select name="category" id="category">
             {% for category in categories %}
                 {% if category %}
-                    <option>{{ category.name }}</option>
+                    <option value="{{ category.category_id }}">{{ category.name }}</option>
                 {% endif %}
             {% endfor %}
-            </datalist>
+            </select>
             <br/>
 
             <input type="submit" value="Submit" class="newItemSubmit"/>

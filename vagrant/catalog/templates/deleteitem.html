@@ -6,12 +6,11 @@
 <body>
     <h1>Are you sure you want to delete {{ item.name }}?</h1>
 
-    <form action="{{ url_for('deleteItem',
-            item_id=item.item_id, category_id=item.category.category_id) }}" method="post">
+    <form action="{{ url_for('deleteItem', item=item, category=item.category) }}" method="post">
 
         <input type="submit" value="Yes, I'm sure">
         <p>
-            <a href="{{ url_for('viewItem', item_id=item.item_id, category_id=item.category.category_id) }}">
+            <a href="{{ url_for('viewItem', item=item, category=item.category) }}">
                 No, go back
             </a>
         </p>

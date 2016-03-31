@@ -6,7 +6,7 @@
     <a href="{{ url_for("catalog") }}">Return to List</a>
 
     <h3>{{ category.name }}</h3>
-    <a href="{{ url_for("editCategory", category_id=category.category_id) }}">Edit</a>
+    <a href="{{ url_for("editCategory", category=category) }}">Edit</a>
 
     <div class="categoryDiv">
         <div class="categoryItems">
@@ -19,7 +19,7 @@
             <ul>
                 {% for item in items %}
                 <li>
-                    <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=category.category_id) }}">
+                    <a href="{{ url_for("viewItem", item=item, category=item.category) }}">
                         {{ item.name }}
                     </a>
                 </li>
@@ -31,7 +31,7 @@
     </div>
     <div class="categoryOptions">
         <a href="{{ url_for("newItem", category_id=category.category_id) }}">Add Item</a>
-        <a href="{{ url_for("deleteCategory", category_id=category.category_id) }}">Delete Category</a>
+        <a href="{{ url_for("deleteCategory", category=category) }}">Delete Category</a>
     </div>
 </body>
 </html>

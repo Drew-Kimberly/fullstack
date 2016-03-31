@@ -13,8 +13,8 @@
         </div>
     </div>
     <div class="itemOptions">
-        <a href="{{ url_for("editItem", category_id=item.category.category_id,item_id=item.item_id) }}">Edit</a>
-        <a href="{{ url_for("deleteItem", category_id=item.category.category_id, item_id=item.item_id) }}">Delete</a>
+        <a href="{{ url_for("editItem", item=item, category=item.category) }}">Edit</a>
+        <a href="{{ url_for("deleteItem", item=item, category=item.category) }}">Delete</a>
     </div>
 </body>
 </html>

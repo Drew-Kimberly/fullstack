@@ -1,0 +1,11 @@
+body { padding-top: 100px; }
+
+#header .container {
+    width: 100%;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.navbar-brand {
+    float: left;
+}

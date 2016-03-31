@@ -24,7 +24,7 @@
             <ul>
                 {% for category in categories %}
                 <li>
-                    <a href="{{ url_for("viewCategory", category_id=category.category_id) }}">
+                    <a href="{{ url_for("viewCategory", category=category) }}">
                         {{ category.name }}
                     </a>
                 </li>
@@ -35,16 +35,21 @@
     </div>
     <div class="latestItems">
         <h3>Latest Items</h3>
-        {% if not latest_items %}
+        {% if not items %}
         <div class="noLatestItems">
             <p>No items have been recently updated</p>
         </div>
         {% else %}
         <div class="latestItemsList">
             <ul>
-                {% for item in latest_items %}
+                {% for item in items %}
                 <li>
-                    <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=item.category.category_id) }}">{{ item.name }}</a>
+                    {#<a href="{{ url_for("viewItem", category_name=item.category.name, item_name=item.name, item_id=item.item_id) }}">
+                        {{ item.name }}
+                    </a>#}
+                    <a href="{{ url_for("viewItem", item=item, category=item.category) }}">
+                        {{ item.name }}
+                    </a>
                 </li>
                 {% endfor %}
             </ul>

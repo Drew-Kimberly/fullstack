@@ -7,8 +7,8 @@
     <h3>{{ item.name }}</h3>
 
     <div class="itemDiv">
-        <form class="editItemForm" action="{{ url_for("editItem",
-                item_id=item.item_id, category_id = item.category.category_id) }}" method="post">
+        <form class="editItemForm" action="{{ url_for("editItem",item=item, category=item.category) }}"
+              method="post">
 
             <label for=name>Name</label>
             <input type="text" class="nameInput" id="name" name="name" value="{{ item.name }}"/>
@@ -20,18 +20,23 @@
             <br/>
 
             <label for="category">Category</label>
-            <input type="text" list="category" name="category" id="category" value="{{ item.category.name }}">
-            <datalist class="categorySelect">
+            <select name="category" id="category">
             {% for category in categories %}
                 {% if category %}
-                    <option value="{{ item.category_id }}">{{ item.category.name }}</option>
+                    {% if category.category_id == item.category_id %}
+                        <option value="{{ category.category_id }}" selected="selected">{{ category.name }}</option>
+                    {% else %}
+                        <option value="{{ category.category_id }}">{{ category.name }}</option>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
-            </datalist>
+            </select>
             <br/>
 
             <input type="submit" value="Save" class="editItemSubmit"/>
-            <a href="{{ url_for("viewItem", item_id=item.item_id, category_id=item.category.category_id) }}">Cancel</a>
+            <a href="{{ url_for("viewItem", item=item, category=item.category) }}">
+                Cancel
+            </a>
         </form>
     </div>
 </body>

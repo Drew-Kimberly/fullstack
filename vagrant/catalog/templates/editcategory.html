@@ -7,15 +7,14 @@
     <h3>{{ category.name }}</h3>
 
     <div class="categoryDiv">
-        <form class="editCategoryForm" action="{{ url_for("editCategory",
-                category_id = category.category_id) }}" method="post">
+        <form class="editCategoryForm" action="{{ url_for("editCategory",category=category) }}" method="post">
 
             <label for=name>Name</label>
             <input type="text" class="nameInput" id="name" name="name" value="{{ category.name }}"/>
             <br/>
 
             <input type="submit" value="Save" class="editCategorySubmit"/>
-            <a href="{{ url_for("viewCategory", category_id=category.category_id) }}">Cancel</a>
+            <a href="{{ url_for("viewCategory", category=category) }}">Cancel</a>
         </form>
     </div>
 </body>

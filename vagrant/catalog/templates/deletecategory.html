@@ -7,11 +7,11 @@
     <h1>Are you sure you want to delete {{ category.name }}?</h1>
     <p><i>This will delete <b>all</b> items associated with this category!</i></p>
 
-    <form action="{{ url_for('deleteCategory', category_id=category.category_id) }}" method="post">
+    <form action="{{ url_for('deleteCategory', category=category) }}" method="post">
 
         <input type="submit" value="Yes, I'm sure">
         <p>
-            <a href="{{ url_for('viewCategory', category_id=category.category_id) }}">
+            <a href="{{ url_for('viewCategory', category=category) }}">
                 No, go back
             </a>
         </p>
