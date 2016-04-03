@@ -36,6 +36,7 @@ def catalog():
 def render(template_name, data):
     return render_template(template_name, data=data)
 
+
 if __name__ == "__main__":
     app.debug = True
     app.run(host='0.0.0.0', port=5000)

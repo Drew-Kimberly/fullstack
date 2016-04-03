@@ -1,4 +1,5 @@
 from database_setup import Item, Category
+import bleach
 
 class AjaxHandler:
     '''This class...'''
@@ -60,11 +61,22 @@ class AjaxHandler:
         if self.action_type == "testAjax":
             dbSession.close()
             return self.posted_data["id"]
+
         elif self.action_type == "GetCategories":
             categories = dbSession.query(Category).all()
             template_name = 'partials/catalog_categories.html'
             dbSession.close()
             return [template_name, categories]
+
+        elif self.action_type == "AddCategory":
+            name = self.posted_data["name"]
+            dbSession.add(Category(name=name))
+            dbSession.commit()
+            categories = dbSession.query(Category).all()
+            dbSession.close()
+            template_name = 'partials/catalog_categories.html'
+            return [template_name, categories]
+
         else:
             dbSession.close()
             return None

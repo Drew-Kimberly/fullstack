@@ -35,21 +35,25 @@
         </div>
     </div>
 
-    <div id="addCategory" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                <i class="glyphicon glyphicon-remove"></i>
-            </button>
-            <h3>Add Category</h3>
-        </div>
-        <div class="modal-body">
-            {% include "partials/addcategory.html" %}
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-link" data-dismiss="modal">
-                Cancel
-            </button>
-            <button class="btn btn-success add-confirm">Add Category</button>
+    <div id="addCategory" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Add Category</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/addcategory.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success add-confirm" data-dismiss="modal">Add Category</button>
+                </div>
+            </div>
         </div>
     </div>
 </body>

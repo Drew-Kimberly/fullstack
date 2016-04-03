@@ -26,18 +26,32 @@ $(function() {
 
     //Add/Edit onclick logic
     $('.btn-add').on('click', function(e) {
-        $('add-confirm').prop('id', $(this).data('add'));
+        $('.add-confirm').prop('id', $(this).data('add'));
     });
 
 
-    //Add Category logic
-    $('#btnAddCategory').on('click', function(e) {
-        var name = "";
+    //Core CRUD logic
 
-        requestData =
-        {
-            "action": "AddCategory",
-            "name": name
-        };
-    });
+    $('body')
+
+        //Add Category logic
+        .on('click','#btnAddCategory', function(e) {
+            var name = $('#name').val();
+
+            requestData =
+            {
+                "action": "AddCategory",
+                "name": name
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+                    $('#categories').replaceWith(response);
+                },
+                null
+            );
+        });
 });
