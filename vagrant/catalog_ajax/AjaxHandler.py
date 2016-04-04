@@ -58,11 +58,20 @@ class AjaxHandler:
         dbSession = self.dbSessionMaker()
 
         # Determine request Action Type and execute respective logic
-        if self.action_type == "testAjax":
+        if self.action_type == "RenderCatalog":
+            categories = dbSession.query(Category).all()
+            items = dbSession.query(Item).all()
             dbSession.close()
-            return self.posted_data["id"]
+            template_name = 'catalog.html'
+            return [template_name, categories, items]
 
         elif self.action_type == "GetCategories":
+            categories = dbSession.query(Category).all()
+            template_name = None
+            dbSession.close()
+            return [template_name, categories]
+
+        elif self.action_type == "RenderCategories":
             categories = dbSession.query(Category).all()
             template_name = 'partials/catalog_categories.html'
             dbSession.close()
@@ -101,6 +110,37 @@ class AjaxHandler:
             dbSession.close()
             template_name = 'partials/catalog_categories.html'
             return [template_name, categories]
+
+        elif self.action_type == "GetItems":
+            items = dbSession.query(Item).all()
+            dbSession.close()
+
+            template_name = None
+            return [template_name, items]
+
+        elif self.action_type == 'RenderItems':
+            items = dbSession.query(Item).all()
+            dbSession.close()
+
+            template_name = 'partials/catalog_items.html'
+            return [template_name, items]
+
+        elif self.action_type == 'RenderItemForm':
+            item_id = self.posted_data["item_id"]
+
+            # Check if we're editing an existing item or adding a new one
+            item = dbSession.query(Item).filter_by(item_id=item_id).first()
+            if item:
+                category_id = self.posted_data["category_id"]
+                name = self.posted_data["name"]
+                description = self.posted_data["description"]
+                return ""
+            else:
+                categories = dbSession.query(Category).all()
+                dbSession.close()
+                template_name = 'partials/additem.html'
+                return [template_name, categories]
+
         else:
             dbSession.close()
             return None

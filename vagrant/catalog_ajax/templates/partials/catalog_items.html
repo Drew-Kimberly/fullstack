@@ -1,5 +1,15 @@
-<div class="col-md-9">
-    <div id="test">
-        ID Clicked: {{ data }}
+<div id="items" class="col-md-9">
+    {% if data %}
+    <ul>
+        {% for item in data %}
+        <li>
+            <a href="#">{{ item.name }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div id="noItems">
+        <span>There are no items available for this category.</span>
     </div>
+    {% endif %}
 </div>

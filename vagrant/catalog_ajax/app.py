@@ -3,6 +3,7 @@ from AjaxHandler import AjaxHandler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Category, Item
+import json
 
 app = Flask(__name__)
 
@@ -28,13 +29,16 @@ def catalog():
             return render(response_data[0], response_data[1])
         else:
             return False
-
-    return render_template('catalog.html')
+    else:
+        return render_template('catalog.html')
 
 
 # Helper Functions
 def render(template_name, data):
-    return render_template(template_name, data=data)
+    if template_name:
+        return render_template(template_name, data=data)
+    else:
+        return json.loads(data)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ $(function() {
     //Actions for on page render
     requestData = 
     {
-        "action": "GetCategories"
+        "action": "RenderCategories"
     };
     
     JSONPost = JSON.stringify(requestData);
@@ -19,6 +19,21 @@ $(function() {
         JSONPost,
         function(response) {
             $('#categories').replaceWith(response);
+        },
+        null
+    );
+
+    requestData =
+    {
+        "action": "RenderItems"
+    };
+
+    JSONPost = JSON.stringify(requestData);
+
+    process(
+        JSONPost,
+        function(response) {
+            $('#items').replaceWith(response);
         },
         null
     );
@@ -55,6 +70,23 @@ $(function() {
 
             var category_name = $.trim(categoryLink.text);
             $('#editCategoryForm').find('input#name').val(category_name);
+        })
+        .on('click', '.btn-add-item', function(e) {
+            requestData =
+            {
+                "action": "RenderItemForm",
+                "item_id": null
+            };
+            
+            JSONPost = JSON.stringify(requestData);
+            
+            process(
+                JSONPost,
+                function(response) {
+                    $('#addItem').find('#itemForm').replaceWith(response);
+                },
+                null
+            );
         });
 
 
@@ -136,6 +168,26 @@ $(function() {
                 JSONPost,
                 function(response) {
                     $('#categories').replaceWith(response);
+                },
+                null
+            );
+        })
+
+        //Add Item
+        .on('click', '#confirmAddItem', function(e) {
+            var addForm = $('#newitemform');
+
+            requestData =
+            {
+                "action": "AddItem",
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+                    $('#items').replaceWith(response);
                 },
                 null
             );

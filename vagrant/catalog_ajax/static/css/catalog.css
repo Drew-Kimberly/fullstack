@@ -43,9 +43,15 @@ Buttons
     border-radius: 25px;
 }
 
-.btn-add {
+.btn-add-category {
     margin-left: .5em;
 }
+
+.btn-add-item {
+    float: right;
+    margin-right: 5em;
+}
+
 
 
 /******************
@@ -127,4 +133,20 @@ Categories
 }
 .categoryIcon.btn-delete:hover {
     color: #FF3232 !important;
+}
+
+
+/**************************************
+Items
+**************************************/
+#itemsContainer {
+    height: 100%;
+}
+
+#noItems {
+    display:inline-block;
+    vertical-align: middle;
+}
+#noItems span {
+    font-style: italic;
 }
