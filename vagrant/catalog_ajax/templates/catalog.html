@@ -20,7 +20,7 @@
                 <h2 id="categoriesHeader">
                     Categories
                     <button type="button" class="btn btn-success btn-circle btn-add"
-                        data-toggle="modal" data-target="#addCategory" data-add="btnAddCategory">
+                        data-toggle="modal" data-target="#addCategory" data-add="confirmAddCategory">
                     <i class="glyphicon glyphicon-plus"></i>
                     </button>
                 </h2>
@@ -55,7 +55,9 @@
                     <button class="btn btn-link" data-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-success add-confirm" data-dismiss="modal">Add Category</button>
+                    <button class="btn btn-success add-confirm" id="confirmAddCategory" data-dismiss="modal">
+                        Add Category
+                    </button>
                 </div>
             </div>
         </div>
@@ -77,7 +79,9 @@
                     <button class="btn btn-link" data-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-success edit-confirm" data-dismiss="modal">Save Changes</button>
+                    <button class="btn btn-success edit-confirm" id="confirmEditCategory" data-dismiss="modal">
+                        Save Changes
+                    </button>
                 </div>
             </div>
         </div>
@@ -90,7 +94,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         <i class="glyphicon glyphicon-remove"></i>
                     </button>
-                    <h3>Edit Category</h3>
+                    <h3>Delete Category</h3>
                 </div>
                 <div class="modal-body">
                     {% include "partials/deletecategory.html" %}
@@ -99,7 +103,9 @@
                     <button class="btn btn-link" data-dismiss="modal">
                         Cancel
                     </button>
-                    <button class="btn btn-danger delete-confirm" data-dismiss="modal">Delete</button>
+                    <button class="btn btn-danger delete-confirm" id="confirmDeleteCategory" data-dismiss="modal">
+                        Delete
+                    </button>
                 </div>
             </div>
         </div>

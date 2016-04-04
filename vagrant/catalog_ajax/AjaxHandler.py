@@ -79,6 +79,13 @@ class AjaxHandler:
 
         elif self.action_type == "EditCategory":
             category_id = self.posted_data["id"]
+            category_name = self.posted_data["name"]
+
+            category_to_edit = dbSession.query(Category).filter_by(category_id=category_id).first()
+            category_to_edit.name = category_name
+            dbSession.add(category_to_edit)
+            dbSession.commit()
+
             categories = dbSession.query(Category).all()
             dbSession.close()
             template_name = 'partials/catalog_categories.html'
@@ -86,6 +93,10 @@ class AjaxHandler:
 
         elif self.action_type == "DeleteCategory":
             category_id = self.posted_data["id"]
+            category_to_delete = dbSession.query(Category).filter_by(category_id=category_id).first()
+            dbSession.delete(category_to_delete)
+            dbSession.commit()
+
             categories = dbSession.query(Category).all()
             dbSession.close()
             template_name = 'partials/catalog_categories.html'

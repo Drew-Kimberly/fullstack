@@ -6,8 +6,8 @@ from database_setup import Base, Category, Item
 
 app = Flask(__name__)
 
-engine = create_engine('postgresql:///catalog')
-# engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
+# engine = create_engine('postgresql:///catalog')
+engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
 Base.metadata.bind = engine
 
 DBSessionMaker = sessionmaker(bind=engine)
