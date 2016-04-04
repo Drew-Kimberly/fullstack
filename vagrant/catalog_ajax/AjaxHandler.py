@@ -77,6 +77,19 @@ class AjaxHandler:
             template_name = 'partials/catalog_categories.html'
             return [template_name, categories]
 
+        elif self.action_type == "EditCategory":
+            category_id = self.posted_data["id"]
+            categories = dbSession.query(Category).all()
+            dbSession.close()
+            template_name = 'partials/catalog_categories.html'
+            return [template_name, categories]
+
+        elif self.action_type == "DeleteCategory":
+            category_id = self.posted_data["id"]
+            categories = dbSession.query(Category).all()
+            dbSession.close()
+            template_name = 'partials/catalog_categories.html'
+            return [template_name, categories]
         else:
             dbSession.close()
             return None
