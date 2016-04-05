@@ -3,7 +3,10 @@
     <ul>
         {% for item in data %}
         <li>
-            <a href="#">{{ item.name }}</a>
+            <a class="itemLink" href="#">
+                <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />
+                <span class="itemNameLabel">{{ item.name }}</span>
+            </a>
         </li>
         {% endfor %}
     </ul>
