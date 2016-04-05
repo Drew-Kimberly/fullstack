@@ -141,6 +141,26 @@ class AjaxHandler:
                 template_name = 'partials/additem.html'
                 return [template_name, categories]
 
+        elif self.action_type == 'AddItem':
+            item_name = self.posted_data["name"]
+            item_category_id = self.posted_data["category_id"]
+            item_description = self.posted_data["description"]
+
+            # Add the item to database
+            dbSession.add(Item(
+                name=item_name,
+                category_id=item_category_id,
+                description=item_description
+            ))
+            dbSession.commit()
+
+            # Retrieve list of all items to display
+            items = dbSession.query(Item).all()
+            dbSession.close()
+
+            template_name = 'partials/catalog_items.html'
+            return [template_name, items]
+
         else:
             dbSession.close()
             return None

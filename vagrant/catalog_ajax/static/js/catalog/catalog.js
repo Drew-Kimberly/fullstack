@@ -175,11 +175,17 @@ $(function() {
 
         //Add Item
         .on('click', '#confirmAddItem', function(e) {
-            var addForm = $('#newitemform');
+            var addForm = $('#newItemForm');
+            var name = addForm.find('#itemName').val();
+            var category_id = addForm.find('#itemCategory').val();
+            var description = addForm.find('#itemDescription').val();
 
             requestData =
             {
                 "action": "AddItem",
+                "name": name,
+                "category_id": category_id,
+                "description": description
             };
 
             JSONPost = JSON.stringify(requestData);
