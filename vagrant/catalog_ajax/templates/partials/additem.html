@@ -1,18 +1,44 @@
-<form id="newItemForm">
-    <label for=name>Name</label>
-    <input type="text" class="nameInput" id="name" name="name" placeholder="Item Name"/>
+<form id="newItemForm" role="form">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group itemName">
+            {#        <div class="imageContainer">#}
+            {#            <img class="itemImage" src="static/img/sample.jpg" alt="Item Image" />#}
+            {#        </div>#}
 
+                    <label for=itemName>Name</label>
+                    <input type="text" class="form-control nameInput" id="itemName" name="itemName" placeholder="Item Name"/>
+                </div>
 
-    <label for="itemDescription">Description</label>
-    <textarea id="itemDescription" name="itemDescription" placeholder="Enter the description for your item">
-    </textarea>
+                <div class="form-group itemCategory">
+                    <label for="itemCategory">Category</label>
+                    <select name="itemCategory" id="itemCategory" name="itemCategory" class="form-control">
+                    {% for category in data %}
+                        {% if category %}
+                            <option value="{{ category.category_id }}">{{ category.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="imageContainer noImage">
+                        <input type="file" class="fileInput" id="itemImageUpload">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <label for="category">Category</label>
-    <select name="itemCategory" id="itemCategory">
-    {% for category in data %}
-        {% if category %}
-            <option value="{{ category.category_id }}">{{ category.name }}</option>
-        {% endif %}
-    {% endfor %}
-    </select>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" name="itemDescription" class="form-control"
+                              placeholder="Enter the description for your item"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>

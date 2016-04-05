@@ -150,3 +150,26 @@ Items
 #noItems span {
     font-style: italic;
 }
+
+.imageContainer {
+    max-width: 500px;
+    height: auto;
+    margin-top: 20px;
+}
+.imageContainer.noImage {
+    border: medium dashed lightgray;
+}
+.itemImage {
+    max-width: 100%;
+    height: auto;
+}
+#newItemForm #itemImageUpload {
+    margin: auto;
+    width: 60%;
+    padding-top: 75px;
+    padding-bottom: 75px;
+}
+
+.itemCategory, .itemName {
+    padding-top: 15px;
+}
