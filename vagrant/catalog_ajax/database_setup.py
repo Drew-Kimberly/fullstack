@@ -23,6 +23,14 @@ class Category(Base):
     name = Column(String(80), nullable=False, unique=True)
     category_id = Column(Integer, primary_key=True)
 
+    @property
+    def serialize(self):
+        # Returns object data in easily serializeable format
+        return {
+            'name': self.name,
+            'category_id': self.category_id,
+        }
+
 
 class Item(Base):
     __tablename__ = 'item'

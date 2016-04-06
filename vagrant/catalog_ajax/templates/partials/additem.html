@@ -14,7 +14,7 @@
                 <div class="form-group itemCategory">
                     <label for="itemCategory">Category</label>
                     <select name="itemCategory" id="itemCategory" name="itemCategory" class="form-control">
-                    {% for category in data %}
+                    {% for category in categories %}
                         {% if category %}
                             <option value="{{ category.category_id }}">{{ category.name }}</option>
                         {% endif %}

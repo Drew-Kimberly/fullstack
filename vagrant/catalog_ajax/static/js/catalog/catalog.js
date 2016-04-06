@@ -10,7 +10,7 @@ $(function() {
     //Actions for on page render
     requestData = 
     {
-        "action": "RenderCategories"
+        "action": "RenderCatalog"
     };
     
     JSONPost = JSON.stringify(requestData);
@@ -18,22 +18,11 @@ $(function() {
     process(
         JSONPost,
         function(response) {
-            $('#categories').replaceWith(response);
-        },
-        null
-    );
 
-    requestData =
-    {
-        "action": "RenderItems"
-    };
+            responseData = JSON.parse(response);
 
-    JSONPost = JSON.stringify(requestData);
-
-    process(
-        JSONPost,
-        function(response) {
-            $('#items').replaceWith(response);
+            $('#categories').replaceWith(responseData[0]);
+            $('#items').replaceWith(responseData[1]);
         },
         null
     );
@@ -83,7 +72,10 @@ $(function() {
             process(
                 JSONPost,
                 function(response) {
-                    $('#addItem').find('#itemForm').replaceWith(response);
+
+                    responseData = JSON.parse(response);
+
+                    $('#addItem').find('#itemForm').replaceWith(responseData[0]);
                 },
                 null
             );
@@ -113,7 +105,10 @@ $(function() {
             process(
                 JSONPost,
                 function(response) {
-                    $('#categories').replaceWith(response);
+
+                    responseData = JSON.parse(response);
+
+                    $('#categories').replaceWith(responseData[0]);
                 },
                 null
             );
@@ -142,7 +137,10 @@ $(function() {
             process(
                 JSONPost,
                 function(response) {
-                    $('#categories').replaceWith(response);
+
+                    responseData = JSON.parse(response);
+
+                    $('#categories').replaceWith(responseData[0]);
                 },
                 null
             );
@@ -167,7 +165,14 @@ $(function() {
             process(
                 JSONPost,
                 function(response) {
-                    $('#categories').replaceWith(response);
+                    
+                    responseData = JSON.parse(response);
+
+                    $('#categories').replaceWith(responseData[0]);
+                    // Response only contains Items response if it's necessary to re-render
+                    if (responseData.length > 1) {
+                        $('#items').replaceWith(responseData[1]);
+                    }
                 },
                 null
             );
@@ -193,7 +198,9 @@ $(function() {
             process(
                 JSONPost,
                 function(response) {
-                    $('#items').replaceWith(response);
+                    responseData = JSON.parse(response);
+
+                    $('#items').replaceWith(responseData[0]);
                 },
                 null
             );
@@ -204,5 +211,9 @@ $(function() {
 
     $('#addCategory').on('hidden.bs.modal', function() {
         $('#newCategoryForm').find('#name').val('');
-    })
+    });
+
+    $('#addItem').on('hidden.bs.modal', function() {
+        $(this).find('form').prop('id', 'itemForm');
+    });
 });

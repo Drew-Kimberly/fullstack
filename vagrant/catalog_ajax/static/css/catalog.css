@@ -251,7 +251,7 @@ Items
     position: absolute;
     text-align: center;
     opacity: 0;
-    background-color: rgba(219, 128, 8, 0.7);
+    background-color: rgba(200, 200, 220, 0.7);
     -webkit-transition: all 0.4s ease-in-out;
     -moz-transition: all 0.4s ease-in-out;
     -ms-transition: all 0.4s ease-in-out;

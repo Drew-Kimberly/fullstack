@@ -1,7 +1,12 @@
 from database_setup import Item, Category
-import bleach
+from ResponseData import ResponseData
+
+CATEGORY_TEMPLATE = 'partials/catalog_categories.html'
+ITEM_TEMPLATE = 'partials/catalog_items.html'
+
 
 class AjaxHandler:
+
     '''This class...'''
 
     def __init__(self, dbSessionMaker):
@@ -62,8 +67,8 @@ class AjaxHandler:
             categories = dbSession.query(Category).all()
             items = dbSession.query(Item).all()
             dbSession.close()
-            template_name = 'catalog.html'
-            return [template_name, categories, items]
+            templates = [CATEGORY_TEMPLATE, ITEM_TEMPLATE]
+            return ResponseData(categories, items, templates)
 
         elif self.action_type == "GetCategories":
             categories = dbSession.query(Category).all()
@@ -83,8 +88,9 @@ class AjaxHandler:
             dbSession.commit()
             categories = dbSession.query(Category).all()
             dbSession.close()
-            template_name = 'partials/catalog_categories.html'
-            return [template_name, categories]
+
+            templates = [CATEGORY_TEMPLATE]
+            return ResponseData(categories, None, templates)
 
         elif self.action_type == "EditCategory":
             category_id = self.posted_data["id"]
@@ -97,19 +103,30 @@ class AjaxHandler:
 
             categories = dbSession.query(Category).all()
             dbSession.close()
-            template_name = 'partials/catalog_categories.html'
-            return [template_name, categories]
+            templates = [CATEGORY_TEMPLATE]
+            return ResponseData(categories, None, templates)
 
         elif self.action_type == "DeleteCategory":
             category_id = self.posted_data["id"]
             category_to_delete = dbSession.query(Category).filter_by(category_id=category_id).first()
+            category_items = dbSession.query(Item).filter_by(category_id=category_id).all()
+            if len(category_items) > 0:
+                item_template = ITEM_TEMPLATE
+                for item in category_items:
+                    dbSession.delete(item)
+            else:
+                item_template = None
             dbSession.delete(category_to_delete)
             dbSession.commit()
 
             categories = dbSession.query(Category).all()
+            if item_template:
+                items = dbSession.query(Item).all()
+            else:
+                items = None
             dbSession.close()
-            template_name = 'partials/catalog_categories.html'
-            return [template_name, categories]
+
+            return ResponseData(categories, items, [CATEGORY_TEMPLATE, ITEM_TEMPLATE])
 
         elif self.action_type == "GetItems":
             items = dbSession.query(Item).all()
@@ -138,8 +155,8 @@ class AjaxHandler:
             else:
                 categories = dbSession.query(Category).all()
                 dbSession.close()
-                template_name = 'partials/additem.html'
-                return [template_name, categories]
+                templates = ['partials/additem.html']
+                return ResponseData(categories, None, templates)
 
         elif self.action_type == 'AddItem':
             item_name = self.posted_data["name"]
@@ -158,8 +175,8 @@ class AjaxHandler:
             items = dbSession.query(Item).all()
             dbSession.close()
 
-            template_name = 'partials/catalog_items.html'
-            return [template_name, items]
+            templates = [ITEM_TEMPLATE]
+            return ResponseData(None, items, templates)
 
         else:
             dbSession.close()

@@ -24,9 +24,9 @@ def catalog():
     if request.method == 'POST':
         post_data = request.get_json(silent=True, force=True)
         ajax_handler.posted_data = post_data
-        response_data = ajax_handler.processRequest()
+        response_data = ajax_handler.processRequest()  # ResponseData object
         if response_data:
-            return render(response_data[0], response_data[1])
+            return process_response(response_data)
         else:
             return False
     else:
@@ -34,11 +34,15 @@ def catalog():
 
 
 # Helper Functions
-def render(template_name, data):
-    if template_name:
-        return render_template(template_name, data=data)
-    else:
-        return json.loads(data)
+
+# Processes the response_data object handed back by the AjaxHandler
+def process_response(response_data):
+    response = []
+    for template in response_data.templates:
+        if template:
+            response.append(render_template(template, categories=response_data.categories, items=response_data.items))
+
+    return json.dumps(response)
 
 
 if __name__ == "__main__":
