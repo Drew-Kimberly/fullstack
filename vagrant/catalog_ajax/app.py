@@ -12,10 +12,10 @@ engine = create_engine('postgresql:///catalog')
 Base.metadata.bind = engine
 
 DBSessionMaker = sessionmaker(bind=engine)
-#dbSession = DBSession()
+dbSession = DBSessionMaker()
 """:type: sqlalchemy.orm.Session"""
 
-ajax_handler = AjaxHandler(DBSessionMaker)
+ajax_handler = AjaxHandler(dbSession)
 
 
 @app.route("/")

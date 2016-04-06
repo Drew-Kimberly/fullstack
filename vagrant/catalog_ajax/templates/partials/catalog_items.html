@@ -2,7 +2,7 @@
     {% if items %}
     <ul>
         {% for item in items %}
-        <li>
+        <li data-categoryid="{{ item.category.category_id }}">
             <div class="listItemWrapper">
                 <a class="itemLink" href="#">
                     <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />

@@ -178,6 +178,16 @@ $(function() {
             );
         })
 
+        //Select Category
+        .on('click', '.categoryLink', function(e) {
+            var category_id = this.id;
+            $("#items li").hide();
+            $("#items").find("li[data-categoryid='" + category_id + "']").show();
+
+            $("#categories").find("div[class='categoryWrapper activeCategory']").removeClass('activeCategory');
+            $(this).parent('div').addClass('activeCategory');
+        })
+
         //Add Item
         .on('click', '#confirmAddItem', function(e) {
             var addForm = $('#newItemForm');
