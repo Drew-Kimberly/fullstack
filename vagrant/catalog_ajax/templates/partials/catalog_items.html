@@ -3,10 +3,16 @@
     <ul>
         {% for item in data %}
         <li>
-            <a class="itemLink" href="#">
-                <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />
-                <span class="itemNameLabel">{{ item.name }}</span>
-            </a>
+            <div class="listItemWrapper">
+                <a class="itemLink" href="#">
+                    <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />
+                    <div class="mask">
+                        <p>{{ item.description }}</p>
+                        <button type="button" class="btn btn-primary btn-sm btnViewItem">View</button>
+                    </div>
+                    <span class="itemNameLabel">{{ item.name }}</span>
+                </a>
+            </div>
         </li>
         {% endfor %}
     </ul>
