@@ -133,16 +133,14 @@ class AjaxHandler:
 
         elif self.action_type == 'RenderItemForm':
             item_id = self.posted_data["item_id"]
+            categories = self.dbSession.query(Category).all()
 
             # Check if we're editing an existing item or adding a new one
             item = self.dbSession.query(Item).filter_by(item_id=item_id).first()
             if item:
-                category_id = self.posted_data["category_id"]
-                name = self.posted_data["name"]
-                description = self.posted_data["description"]
-                return ""
+                templates = ['partials/edititem.html']
+                return ResponseData(categories, [item], templates)
             else:
-                categories = self.dbSession.query(Category).all()
                 templates = ['partials/additem.html']
                 return ResponseData(categories, None, templates)
 
@@ -162,6 +160,36 @@ class AjaxHandler:
             # Retrieve list of all items to display
             items = self.dbSession.query(Item).all()
 
+            templates = [ITEM_TEMPLATE]
+            return ResponseData(None, items, templates)
+
+        elif self.action_type == 'SelectItem':
+            item_id = self.posted_data["item_id"]
+            selected_item = [self.dbSession.query(Item).filter_by(item_id=item_id).first()]
+            category = [selected_item[0].category]
+            templates = ['partials/viewitem.html']
+            return ResponseData(category, selected_item, templates)
+
+        elif self.action_type == 'DeleteItem':
+            item_id = self.posted_data["item_id"]
+            item_to_delete = self.dbSession.query(Item).filter_by(item_id=item_id).first()
+            self.dbSession.delete(item_to_delete)
+            self.dbSession.commit()
+
+            items = self.dbSession.query(Item).all()
+            templates = [ITEM_TEMPLATE]
+            return ResponseData(None, items, templates)
+
+        elif self.action_type == 'EditItem':
+            item_id = self.posted_data["item_id"]
+            item_to_edit = self.dbSession.query(Item).filter_by(item_id=item_id).first()
+            item_to_edit.name = self.posted_data["item_name"]
+            item_to_edit.category_id = self.posted_data["category_id"]
+            item_to_edit.description = self.posted_data["description"]
+            self.dbSession.add(item_to_edit)
+            self.dbSession.commit()
+
+            items = self.dbSession.query(Item).all()
             templates = [ITEM_TEMPLATE]
             return ResponseData(None, items, templates)
 

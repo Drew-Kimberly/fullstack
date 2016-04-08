@@ -141,5 +141,60 @@
             </div>
         </div>
     </div>
+
+    <div id="editItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Edit Item</h3>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm"></form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success add-confirm" id="confirmEditItem" data-dismiss="modal">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Delete Item</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/deleteitem.html" %} </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-danger delete-confirm" id="confirmDeleteItem" data-dismiss="modal">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

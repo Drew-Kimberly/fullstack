@@ -39,9 +39,9 @@ class Item(Base):
     name = Column(String(80), nullable=False)
     description = Column(Text, nullable=False)
     created_on = Column(DateTime, server_default=func.now())  # PostgreSQL
-    created_on = Column(TIMESTAMP, nullable=False)  # MySQL
+    # created_on = Column(TIMESTAMP, nullable=False)  # MySQL
     last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())  # PostgreSQL
-    last_updated = Column(TIMESTAMP, nullable=False)  # MySQL
+    # last_updated = Column(TIMESTAMP, nullable=False)  # MySQL
     category_id = Column(Integer, ForeignKey('category.category_id'))
     category = relationship(Category)
 

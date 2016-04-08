@@ -32,7 +32,7 @@ $(function() {
 
     $('body')
 
-        .on('click', '.btn-delete', function(e) {
+        .on('click', '#categories .btn-delete', function(e) {
             var category_id = $(this).parent().find('.categoryLink')[0].id;
             if ($('#deleteCategoryForm').find("input[name='category_id']").length == 0) {
                 $('<input />').attr('type', 'hidden')
@@ -44,7 +44,19 @@ $(function() {
                 $('#deleteCategoryForm').find("input[name='category_id']").val(category_id);
             }
         })
-        .on('click', '.btn-edit', function(e) {
+        .on('click', '#items .btn-delete', function(e) {
+            var itemID = $($(this).parents('.listItemWrapper')[0]).find('.itemLink').data('itemid');
+            if ($('#deleteItemForm').find("input[name='item_id']").length == 0) {
+                $('<input />').attr('type', 'hidden')
+                    .attr('name', 'item_id')
+                    .attr('value', itemID)
+                    .appendTo('#deleteItemForm');
+            }
+            else {
+                $('#deleteItemForm').find("input[name='item_id']").val(itemID);
+            }
+        })
+        .on('click', '#categories .btn-edit', function(e) {
             var categoryLink = $(this).parent().find('.categoryLink')[0];
             var category_id = categoryLink.id;
             if ($('#editCategoryForm').find("input[name='category_id']").length == 0) {
@@ -59,6 +71,28 @@ $(function() {
 
             var category_name = $.trim(categoryLink.text);
             $('#editCategoryForm').find('input#name').val(category_name);
+        })
+        .on('click', '#items .btn-edit', function(e) {
+            var itemID = $($(this).parents('.listItemWrapper')[0]).find('.itemLink').data('itemid');
+            
+            requestData = 
+            {
+                "action": "RenderItemForm",
+                "item_id": itemID
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+
+                    responseData = JSON.parse(response);
+
+                    $('#editItem').find('#itemForm').replaceWith(responseData[0]);
+                },
+                null
+            );
         })
         .on('click', '.btn-add-item', function(e) {
             requestData =
@@ -79,7 +113,7 @@ $(function() {
                 },
                 null
             );
-        });
+        })
 
 
 
@@ -220,7 +254,87 @@ $(function() {
                 },
                 null
             );
-        });
+        })
+
+        //Select Item
+        .on('click', '.btnViewItem', function(e) {
+            var itemLink = $(this).parents('.itemLink')[0];
+            var itemID = $(itemLink).data('itemid');
+            requestData =
+            {
+                "action": "SelectItem",
+                "item_id":itemID
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+
+                    responseData = JSON.parse(response);
+
+                    $('#viewItem').find('.modal-body').replaceWith(responseData[0]);
+                },
+                null
+            );
+
+        })
+
+        //Edit Item
+        .on('click', '#confirmEditItem', function(e) {
+            var editItemForm = $('#editItemForm');
+            var itemID = editItemForm.data('itemid');
+            var itemName = editItemForm.find('#itemName').val();
+            var categoryID = editItemForm.find('#itemCategory').val();
+            var description = editItemForm.find('#itemDescription').val();
+
+            requestData =
+            {
+                "action": "EditItem",
+                "item_id": itemID,
+                "item_name": itemName,
+                "category_id": categoryID,
+                "description": description
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+
+                    responseData = JSON.parse(response);
+
+                    $('#items').replaceWith(responseData[0]);
+                },
+                null
+            );
+        })
+
+        //Delete Item
+        .on('click', '#confirmDeleteItem', function(e) {
+            var itemID = $('#deleteItemForm').find("input[name='item_id']").val();
+
+            requestData =
+            {
+                "action":"DeleteItem",
+                "item_id":itemID
+            };
+
+            JSONPost = JSON.stringify(requestData);
+
+            process(
+                JSONPost,
+                function(response) {
+
+                    responseData = JSON.parse(response);
+
+                    $('#items').replaceWith(responseData[0]);
+                },
+                null
+            );
+        })
 
 
 
@@ -230,6 +344,10 @@ $(function() {
     });
 
     $('#addItem').on('hidden.bs.modal', function() {
+        $(this).find('form').prop('id', 'itemForm');
+    });
+
+    $('#editItem').on('hidden.bs.modal', function() {
         $(this).find('form').prop('id', 'itemForm');
     });
 });

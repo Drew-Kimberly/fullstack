@@ -17,7 +17,6 @@ dbSession = DBSessionMaker()
 
 ajax_handler = AjaxHandler(dbSession)
 
-
 @app.route("/")
 @app.route("/catalog", methods=["GET", "POST"])
 def catalog():
