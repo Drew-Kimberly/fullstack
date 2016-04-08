@@ -4,6 +4,7 @@
 var requestData = {};
 var JSONPost;
 var responseData;
+var uploadFile;
 
 $(function() {
 
@@ -114,6 +115,10 @@ $(function() {
                 null
             );
         })
+        //File Upload
+        .on('change', '.fileInput', function(e) {
+            uploadFile = e.target.files;
+        });
 
 
 
@@ -235,6 +240,43 @@ $(function() {
             var category_id = addForm.find('#itemCategory').val();
             var description = addForm.find('#itemDescription').val();
 
+            //File Upload
+            var fileData;
+            if (uploadFile.length > 0) {
+                fileData =
+                {
+                    "action": "FileUpload",
+                    "filename": uploadFile[0].name,
+                    "filesize": uploadFile[0].size,
+                    "filetype": uploadFile[0].type,
+                    "lastModified": uploadFile[0].lastModified
+                };
+            }
+
+            JSONPost = JSON.stringify(fileData);
+
+            $.ajax({
+                url: '/catalog',
+                type: 'POST',
+                data: JSONPost,
+                cache: false,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                success: function(data, textStatus, jqXHR) {
+                    if (typeof data.error === 'undefined') {
+                        doFunctionHere(e, data);
+                    }
+                    else {
+                        alert('ERRORS: ' + data.error);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('Errors: ' + textStatus);
+                }
+
+            });
+
             requestData =
             {
                 "action": "AddItem",
@@ -334,7 +376,7 @@ $(function() {
                 },
                 null
             );
-        })
+        });
 
 
 
