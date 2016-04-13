@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, jsonify
 from AjaxHandler import AjaxHandler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -23,12 +23,24 @@ ajax_handler = AjaxHandler(dbSession)
 def catalog():
     if request.method == 'POST':
         post_data = request.get_json(silent=True, force=True)
-        ajax_handler.posted_data = post_data
-        response_data = ajax_handler.processRequest()  # ResponseData object
-        if response_data:
-            return process_response(response_data)
+        if post_data:
+            # Normal ajax json post
+            ajax_handler.posted_data = post_data
+            response_data = ajax_handler.processRequest()  # ResponseData object
+            if response_data:
+                return process_response(response_data)
+            else:
+                return False
         else:
-            return False
+            # Handle uploaded files in ajax post
+
+            post_data = json.loads(request.form['request_data'])
+            ajax_handler.posted_data = post_data
+            response_data = ajax_handler.processRequest()
+            if response_data:
+                return process_response(response_data)
+            else:
+                return False
     else:
         return render_template('catalog.html')
 

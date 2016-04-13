@@ -230,11 +230,6 @@ Items
     width: 260px;
     height: 210px;
     float: left;
-    /*margin: 25px 25px 15px 25px;*/
-    /*-webkit-transition: box-shadow 0.5s ease;*/
-    /*-moz-transition: box-shadow 0.5s ease;*/
-    /*-o-transition: box-shadow 0.5s ease;*/
-    /*transition: box-shadow 0.5s ease;*/
 }
 
 #items .listItemWrapper {
@@ -265,6 +260,15 @@ Items
 .itemIcon.btn-delete {
     margin-right: 3px;
     margin-left: 7px;
+}
+
+.previewImage {
+    width: auto;
+    height: auto;
+    max-width: 500px;
+    max-height: 250px;
+    display: block;
+    margin: auto;
 }
 
 /*Hover effect adapted from:*/
@@ -369,7 +373,7 @@ Items
 
 .imageContainer {
     max-width: 500px;
-    height: auto;
+    max-height: 250px;
     margin-top: 20px;
 }
 .imageContainer.noImage {

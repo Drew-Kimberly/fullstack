@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Catalog</h1>
+
+    <p>
+        <a href="{{ url_for("newCategory") }}">Add Category</a>
+        {% if categories %}
+        <a href="{{ url_for("newItem") }}">Add Item</a>
+        {% endif %}
+    </p>
+
+    <div class="categories">
+        <h3>Categories</h3>
+        {% if not categories %}
+        <div class="noCategories">
+            <p>No categories available.</p>
+        </div>
+        {% else %}
+        <div class="categoriesList">
+            <ul>
+                {% for category in categories %}
+                <li>
+                    <a href="{{ url_for("viewCategory", category=category) }}">
+                        {{ category.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    <div class="latestItems">
+        <h3>Latest Items</h3>
+        {% if not items %}
+        <div class="noLatestItems">
+            <p>No items have been recently updated</p>
+        </div>
+        {% else %}
+        <div class="latestItemsList">
+            <ul>
+                {% for item in items %}
+                <li>
+                    {#<a href="{{ url_for("viewItem", category_name=item.category.name, item_name=item.name, item_id=item.item_id) }}">
+                        {{ item.name }}
+                    </a>#}
+                    <a href="{{ url_for("viewItem", item=item, category=item.category) }}">
+                        {{ item.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

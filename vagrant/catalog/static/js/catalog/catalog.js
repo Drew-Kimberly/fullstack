@@ -116,8 +116,21 @@ $(function() {
             );
         })
         //File Upload
+        //Reference: http://www.html5rocks.com/en/tutorials/file/dndfiles/
         .on('change', '.fileInput', function(e) {
-            uploadFile = e.target.files;
+            uploadFile = e.target.files[0];
+            var reader = new FileReader();
+
+            //Show the image in the modal when it loads
+            reader.onload = function(e) {
+                var container = $('.imageContainer');
+                container.removeClass('noImage');
+                container.prepend('<img class="previewImage" src="' + e.target.result + '" />');
+                container.children('#itemImageUpload').hide();
+            };
+
+            reader.readAsDataURL(uploadFile);
+
         });
 
 
@@ -235,67 +248,62 @@ $(function() {
 
         //Add Item
         .on('click', '#confirmAddItem', function(e) {
+            var formData = new FormData();
+            var file_data = uploadFile ? uploadFile : null;
             var addForm = $('#newItemForm');
-            var name = addForm.find('#itemName').val();
-            var category_id = addForm.find('#itemCategory').val();
-            var description = addForm.find('#itemDescription').val();
-
-            //File Upload
-            var fileData;
-            if (uploadFile.length > 0) {
-                fileData =
-                {
-                    "action": "FileUpload",
-                    "filename": uploadFile[0].name,
-                    "filesize": uploadFile[0].size,
-                    "filetype": uploadFile[0].type,
-                    "lastModified": uploadFile[0].lastModified
-                };
-            }
-
-            JSONPost = JSON.stringify(fileData);
-
-            $.ajax({
-                url: '/catalog',
-                type: 'POST',
-                data: JSONPost,
-                cache: false,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-                success: function(data, textStatus, jqXHR) {
-                    if (typeof data.error === 'undefined') {
-                        doFunctionHere(e, data);
-                    }
-                    else {
-                        alert('ERRORS: ' + data.error);
-                    }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    alert('Errors: ' + textStatus);
-                }
-
-            });
 
             requestData =
             {
                 "action": "AddItem",
-                "name": name,
-                "category_id": category_id,
-                "description": description
+                "name": addForm.find('#itemName').val(),
+                "category_id": addForm.find('#itemCategory').val(),
+                "description": addForm.find('#itemDescription').val()
             };
 
-            JSONPost = JSON.stringify(requestData);
+            JSONPost = JSON.stringify(requestData)
 
-            process(
-                JSONPost,
-                function(response) {
+            formData.append('request_data', JSONPost);
+            formData.append('file_data', file_data);
+
+            $.ajax({
+                url: '/catalog',
+                type: 'POST',
+                data: formData,
+                cache: false,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                success: function(response) {
+
                     responseData = JSON.parse(response);
 
                     $('#items').replaceWith(responseData[0]);
                 },
-                null
-            );
+                error: function(textStatus) {
+                    alert('Errors: ' + textStatus);
+                }
+            });
+
+            // requestData =
+            // {
+            //     "action": "AddItem",
+            //     "name": name,
+            //     "category_id": category_id,
+            //     "description": description,
+            //     "file_data": file_data
+            // };
+            //
+            // JSONPost = JSON.stringify(requestData);
+            //
+            // process(
+            //     JSONPost,
+            //     function(response) {
+            //         responseData = JSON.parse(response);
+            //
+            //         $('#items').replaceWith(responseData[0]);
+            //     },
+            //     null
+            // );
         })
 
         //Select Item
