@@ -26,7 +26,6 @@ class ItemImage(Base):
     extension = Column(String(8), nullable=False)
     size = Column(Integer, nullable=False)
     type = Column(String(50), nullable=False)
-    item_id = Column(Integer, ForeignKey('item.item_id'), nullable=False)
 
 
 class Category(Base):
