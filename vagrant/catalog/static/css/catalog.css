@@ -271,6 +271,15 @@ Items
     margin: auto;
 }
 
+.itemThumbnailImage {
+    width: auto;
+    height: auto;
+    max-width: 200px;
+    max-height: 150px;
+    display: block;
+    margin: auto;
+}
+
 /*Hover effect adapted from:*/
 /*http://tympanus.net/codrops/2011/11/02/original-hover-effects-with-css3/*/
 #items img {

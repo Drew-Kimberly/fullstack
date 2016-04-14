@@ -5,3 +5,4 @@ __pycache__/
 vagrant/.vagrant
 Intro_To_DB/forum/q
 *alembic*
+img*

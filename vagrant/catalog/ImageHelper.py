@@ -13,9 +13,6 @@ class ImageHelper:
         self.image_file = image_file
 
 
-    def save_file(self):
-
-
 
 
 

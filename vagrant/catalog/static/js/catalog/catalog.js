@@ -257,8 +257,13 @@ $(function() {
                 "action": "AddItem",
                 "name": addForm.find('#itemName').val(),
                 "category_id": addForm.find('#itemCategory').val(),
-                "description": addForm.find('#itemDescription').val()
+                "description": addForm.find('#itemDescription').val(),
             };
+
+            if (file_data) {
+                requestData["file_size"] = file_data.size;
+                requestData["file_type"] = file_data.type;
+            }
 
             JSONPost = JSON.stringify(requestData)
 
@@ -270,7 +275,6 @@ $(function() {
                 type: 'POST',
                 data: formData,
                 cache: false,
-                dataType: 'json',
                 processData: false,
                 contentType: false,
                 success: function(response) {

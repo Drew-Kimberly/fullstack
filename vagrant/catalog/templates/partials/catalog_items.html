@@ -5,7 +5,11 @@
         <li data-categoryid="{{ item.category.category_id }}">
             <div class="listItemWrapper">
                 <a class="itemLink" href="#" data-itemid="{{ item.item_id }}">
+                    {% if item.image_id %}
+                    <img class="itemThumbnailImage" src="../../static/img/{{ item.image.name }}" />
+                    {% else %}
                     <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />
+                    {% endif %}
                     <div class="mask">
                         <p>{{ item.description }}</p>
                         <button type="button" class="btn btn-primary btn-sm btnViewItem"
