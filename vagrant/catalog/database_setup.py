@@ -68,8 +68,8 @@ class Item(Base):
         }
 
 
-engine = create_engine('postgresql:///catalog')
-# engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
+# engine = create_engine('postgresql:///catalog')
+engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
 if not database_exists(engine.url):
     create_database(engine.url)
 

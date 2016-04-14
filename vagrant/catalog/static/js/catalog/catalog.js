@@ -1,12 +1,14 @@
 /*
  */
 
+var formData;
 var requestData = {};
 var JSONPost;
 var responseData;
 var uploadFile;
 
 $(function() {
+    formData = new FormData();
 
     //Actions for on page render
     requestData = 
@@ -15,9 +17,10 @@ $(function() {
     };
     
     JSONPost = JSON.stringify(requestData);
+    formData.append('request_data', JSONPost);
     
     process(
-        JSONPost,
+        formData,
         function(response) {
 
             responseData = JSON.parse(response);
@@ -75,6 +78,7 @@ $(function() {
         })
         .on('click', '#items .btn-edit', function(e) {
             var itemID = $($(this).parents('.listItemWrapper')[0]).find('.itemLink').data('itemid');
+            formData = new FormData();
             
             requestData = 
             {
@@ -83,9 +87,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -96,6 +101,8 @@ $(function() {
             );
         })
         .on('click', '.btn-add-item', function(e) {
+            formData = new FormData();
+
             requestData =
             {
                 "action": "RenderItemForm",
@@ -103,9 +110,10 @@ $(function() {
             };
             
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
             
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -144,7 +152,7 @@ $(function() {
             var newCategoryForm = $('#newCategoryForm');
             var nameInput = newCategoryForm.find('#name');
             var name = $.trim(nameInput.val());
-            //nameInput.val('');
+            formData = new FormData();
 
             requestData =
             {
@@ -153,9 +161,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -172,10 +181,10 @@ $(function() {
             var editForm = $('#editCategoryForm');
             var idInput = editForm.find("input[name='category_id']");
             var nameInput = editForm.find('input#name');
-
             var category_id = idInput.val();
             idInput.remove();
             var name = $.trim(nameInput.val());
+            formData = new FormData();
 
             requestData =
             {
@@ -185,9 +194,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -204,6 +214,8 @@ $(function() {
             var deleteForm = $('#deleteCategoryForm');
             var idInput = deleteForm.find("input[name='category_id']");
             var category_id = idInput.val();
+            formData = new FormData();
+
             idInput.remove();
 
             requestData =
@@ -213,9 +225,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
                     
                     responseData = JSON.parse(response);
@@ -230,6 +243,7 @@ $(function() {
             );
         })
 
+
         //Select Category
         .on('click', '.categoryLink', function(e) {
             var category_id = this.id;
@@ -240,15 +254,17 @@ $(function() {
             $(this).parent('div').addClass('activeCategory');
         })
 
+
         //View All Categories
         .on('click', '#viewAllCategories, #home', function(e) {
             $('#items').find('li').show();
             $("#categories").find("div[class='categoryWrapper activeCategory']").removeClass('activeCategory');
         })
 
+
         //Add Item
         .on('click', '#confirmAddItem', function(e) {
-            var formData = new FormData();
+            formData = new FormData();
             var file_data = uploadFile ? uploadFile : null;
             var addForm = $('#newItemForm');
 
@@ -265,7 +281,7 @@ $(function() {
                 requestData["file_type"] = file_data.type;
             }
 
-            JSONPost = JSON.stringify(requestData)
+            JSONPost = JSON.stringify(requestData);
 
             formData.append('request_data', JSONPost);
             formData.append('file_data', file_data);
@@ -287,33 +303,15 @@ $(function() {
                     alert('Errors: ' + textStatus);
                 }
             });
-
-            // requestData =
-            // {
-            //     "action": "AddItem",
-            //     "name": name,
-            //     "category_id": category_id,
-            //     "description": description,
-            //     "file_data": file_data
-            // };
-            //
-            // JSONPost = JSON.stringify(requestData);
-            //
-            // process(
-            //     JSONPost,
-            //     function(response) {
-            //         responseData = JSON.parse(response);
-            //
-            //         $('#items').replaceWith(responseData[0]);
-            //     },
-            //     null
-            // );
         })
+
 
         //Select Item
         .on('click', '.btnViewItem', function(e) {
             var itemLink = $(this).parents('.itemLink')[0];
             var itemID = $(itemLink).data('itemid');
+            formData = new FormData();
+
             requestData =
             {
                 "action": "SelectItem",
@@ -322,8 +320,10 @@ $(function() {
 
             JSONPost = JSON.stringify(requestData);
 
+            formData.append('request_data', JSONPost);
+
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -335,6 +335,7 @@ $(function() {
 
         })
 
+
         //Edit Item
         .on('click', '#confirmEditItem', function(e) {
             var editItemForm = $('#editItemForm');
@@ -342,6 +343,7 @@ $(function() {
             var itemName = editItemForm.find('#itemName').val();
             var categoryID = editItemForm.find('#itemCategory').val();
             var description = editItemForm.find('#itemDescription').val();
+            formData = new FormData();
 
             requestData =
             {
@@ -353,9 +355,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);
@@ -366,9 +369,11 @@ $(function() {
             );
         })
 
+
         //Delete Item
         .on('click', '#confirmDeleteItem', function(e) {
             var itemID = $('#deleteItemForm').find("input[name='item_id']").val();
+            formData = new FormData();
 
             requestData =
             {
@@ -377,9 +382,10 @@ $(function() {
             };
 
             JSONPost = JSON.stringify(requestData);
+            formData.append('request_data', JSONPost);
 
             process(
-                JSONPost,
+                formData,
                 function(response) {
 
                     responseData = JSON.parse(response);

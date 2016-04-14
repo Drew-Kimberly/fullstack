@@ -9,6 +9,8 @@ function process(requestJsonData, successCallback, errorCallback) {
         url: "/catalog",
         type: "POST",
         data: requestJsonData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             if (successCallback != null) {
                 successCallback(response);
