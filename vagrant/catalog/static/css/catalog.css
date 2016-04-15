@@ -236,6 +236,7 @@ Items
 #items .listItemWrapper {
     width: 200px;
     position: relative;
+    background-color: #D9D9D9;
 }
 
 #items a.itemLink:hover {
