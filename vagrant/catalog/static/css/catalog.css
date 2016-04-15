@@ -286,11 +286,11 @@ Items
     height: 150px;
     display: block;
     margin: auto;
-    border: medium dashed #CACACA;
+    border: medium dashed #C5C5C5;
 }
 .noImageIcon {
     font-size: 46px;
-    color: #CACACA;
+    color: #C5C5C5;
     margin: 27% 38.5% 27% 38.5%
 }
 
