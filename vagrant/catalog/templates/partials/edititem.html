@@ -30,9 +30,22 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
+                    {% if items[0].image_id %}
+                    <div class="imageContainer">
+                        <img class="previewImage" src="static/img/{{ items[0].image.name }}" />
+                    </div>
+                    <div class="editImgOptionsWrapper">
+                        <div class="editImgOptions">
+                            <input type="file" id="updateImageUpload" />
+                            <label for="updateImageUpload">Update Image</label>
+                            <a class="deleteImage" href="#">Remove</a>
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="imageContainer noImage">
                         <input type="file" class="fileInput" id="itemImageUpload">
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

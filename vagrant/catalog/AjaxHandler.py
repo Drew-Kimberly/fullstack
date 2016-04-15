@@ -161,41 +161,55 @@ class AjaxHandler:
             item_name = self.posted_data["name"]
             item_category_id = self.posted_data["category_id"]
             item_description = self.posted_data["description"]
+            is_error = False
 
             if self.posted_file:
                 if Util.is_image(self.posted_file.filename):
-                    image_name = secure_filename(self.posted_file.filename)
-                    item_image = ItemImage(
-                        name=image_name,
-                        extension=os.path.splitext(image_name)[1],
-                        friendly_name=os.path.splitext(image_name)[0],
-                        size=self.posted_data["file_size"],
-                        type=self.posted_data["file_type"]
-                    )
-                    self.db_session.add(item_image)
-                    self.db_session.flush()
+                    try:
+                        image_name = secure_filename(self.posted_file.filename)
+                        item_image = ItemImage(
+                            name=image_name,
+                            extension=os.path.splitext(image_name)[1],
+                            friendly_name=os.path.splitext(image_name)[0],
+                            size=self.posted_data["file_size"],
+                            type=self.posted_data["file_type"]
+                        )
+                        self.db_session.add(item_image)
+                        self.db_session.flush()
 
-                    self.db_session.add(Item(
-                        name=item_name,
-                        category_id=item_category_id,
-                        description=item_description,
-                        image_id=item_image.image_id
-                    ))
+                        self.db_session.add(Item(
+                            name=item_name,
+                            category_id=item_category_id,
+                            description=item_description,
+                            image_id=item_image.image_id
+                        ))
+                    except Exception as e:
+                        is_error = True
+                        print(e.message)
 
                     # Save image to filesystem (static/img/)
-                    self.posted_file.save(os.path.join(Util.UPLOAD_FOLDER, item_image.name))
+                    if not is_error:
+                        self.posted_file.save(os.path.join(Util.UPLOAD_FOLDER, item_image.name))
                 else:
-                    # Not an image
+                    # Not an image - flash error message and do not save item
+                    is_error = True
+                    print(e.message)
+                    error_message = "Uploaded file must be an image format."
                     pass
             else:
                 # No Image Uploaded
-                self.db_session.add(Item(
-                    name=item_name,
-                    category_id=item_category_id,
-                    description=item_description
-                ))
+                try:
+                    self.db_session.add(Item(
+                        name=item_name,
+                        category_id=item_category_id,
+                        description=item_description
+                    ))
+                except Exception:
+                    is_error = True
+                    print(e.message)
 
-            self.db_session.commit()
+            if not is_error:
+                self.db_session.commit()
 
             # Retrieve list of all items to display
             items = self.db_session.query(Item).all()
@@ -211,11 +225,20 @@ class AjaxHandler:
             return ResponseData(category, selected_item, templates)
 
         elif self.action_type == 'DeleteItem':
+            # Delete Item from database
             item_id = self.posted_data["item_id"]
             item_to_delete = self.db_session.query(Item).filter_by(item_id=item_id).first()
+            image_name = ""
+            if item_to_delete.image_id:
+                image_name = item_to_delete.image.name
             self.db_session.delete(item_to_delete)
             self.db_session.commit()
 
+            # Delete Item image from filesystem if it exists
+            if os.path.isfile(Util.UPLOAD_FOLDER + '/' + image_name):
+                os.remove(Util.UPLOAD_FOLDER + '/' + image_name)
+
+            # Query and return all items
             items = self.db_session.query(Item).all()
             templates = [ITEM_TEMPLATE]
             return ResponseData(None, items, templates)

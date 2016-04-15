@@ -3,30 +3,34 @@
     <ul>
         {% for item in items %}
         <li data-categoryid="{{ item.category.category_id }}">
-            <div class="listItemWrapper">
-                <a class="itemLink" href="#" data-itemid="{{ item.item_id }}">
-                    {% if item.image_id %}
-                    <img class="itemThumbnailImage" src="../../static/img/{{ item.image.name }}" />
-                    {% else %}
-                    <img class="itemThumbnailImage" src="http://dummyimage.com/200x150/335/DDD" />
-                    {% endif %}
-                    <div class="mask">
-                        <p>{{ item.description }}</p>
-                        <button type="button" class="btn btn-primary btn-sm btnViewItem"
-                                data-toggle="modal" data-target="#viewItem">View</button>
-                        <a class="itemIcon btn-delete" href="#" data-toggle="modal"
-                                data-target="#deleteItem">
-                            <i class="glyphicon glyphicon-remove"></i>
-                        </a>
-                        <a class="itemIcon btn-edit" href="#" data-toggle="modal"
-                                data-target="#editItem">
-                            <i class="glyphicon glyphicon-pencil"></i>
-                        </a>
-                    </div>
-                    <span class="itemNameLabel">
+            <div class="listItemImageLinkWrapper">
+                <div class="listItemWrapper">
+                    <a class="itemLink" href="#" data-itemid="{{ item.item_id }}">
+                        {% if item.image_id %}
+                        <img class="itemThumbnailImage" src="../../static/img/{{ item.image.name }}" />
+                        {% else %}
+                        <div class="itemThumbnailNoImage">
+                            <i class="glyphicon glyphicon-camera noImageIcon"></i>
+                        </div>
+                        {% endif %}
+                        <div class="mask">
+                            <p>{{ item.description }}</p>
+                            <button type="button" class="btn btn-primary btn-sm btnViewItem"
+                                    data-toggle="modal" data-target="#viewItem">View</button>
+                            <a class="itemIcon btn-delete" href="#" data-toggle="modal"
+                                    data-target="#deleteItem">
+                                <i class="glyphicon glyphicon-remove"></i>
+                            </a>
+                            <a class="itemIcon btn-edit" href="#" data-toggle="modal"
+                                    data-target="#editItem">
+                                <i class="glyphicon glyphicon-pencil"></i>
+                            </a>
+                        </div>
+                    </a>
+                </div>
+                <span class="itemNameLabel">
                         {{ item.name }}
-                    </span>
-                </a>
+                </span>
             </div>
         </li>
         {% endfor %}

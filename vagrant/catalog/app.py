@@ -9,26 +9,24 @@ import json
 
 app = Flask(__name__)
 
-# engine = create_engine('postgresql:///catalog')
-engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
+engine = create_engine('postgresql:///catalog')
+# engine = create_engine('mysql://andkim:andkim@localhost:3306/catalog', pool_recycle=3600)
 Base.metadata.bind = engine
 
 DBSessionMaker = sessionmaker(bind=engine)
 dbSession = DBSessionMaker()
 """:type: sqlalchemy.orm.Session"""
 
-ajax_handler = AjaxHandler(dbSession)
-
 
 @app.route("/")
 @app.route("/catalog", methods=["GET", "POST"])
 def catalog():
     if request.method == 'POST':
+        ajax_handler = AjaxHandler(dbSession)
         post_data = json.loads(request.form['request_data'])
-        # post_data = request.get_json(silent=True, force=True)
         if post_data:
             if 'file_data' not in request.files:
-                # Normal ajax json post
+                # Normal post request without uploaded file
                 ajax_handler.posted_data = post_data
                 response_data = ajax_handler.processRequest()  # ResponseData object
                 if response_data:

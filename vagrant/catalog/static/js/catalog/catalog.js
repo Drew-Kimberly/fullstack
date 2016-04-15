@@ -4,7 +4,6 @@
 var formData;
 var requestData = {};
 var JSONPost;
-var responseData;
 var uploadFile;
 
 $(function() {
@@ -22,11 +21,8 @@ $(function() {
     process(
         formData,
         function(response) {
-
-            responseData = JSON.parse(response);
-
-            $('#categories').replaceWith(responseData[0]);
-            $('#items').replaceWith(responseData[1]);
+            $('#categories').replaceWith(response[0]);
+            $('#items').replaceWith(response[1]);
         },
         null
     );
@@ -92,10 +88,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#editItem').find('#itemForm').replaceWith(responseData[0]);
+                    $('#editItem').find('#itemForm').replaceWith(response[0]);
                 },
                 null
             );
@@ -115,10 +108,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#addItem').find('#itemForm').replaceWith(responseData[0]);
+                    $('#addItem').find('#itemForm').replaceWith(response[0]);
                 },
                 null
             );
@@ -166,10 +156,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#categories').replaceWith(responseData[0]);
+                    $('#categories').replaceWith(response[0]);
                 },
                 null
             );
@@ -199,10 +186,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#categories').replaceWith(responseData[0]);
+                    $('#categories').replaceWith(response[0]);
                 },
                 null
             );
@@ -230,13 +214,10 @@ $(function() {
             process(
                 formData,
                 function(response) {
-                    
-                    responseData = JSON.parse(response);
-
-                    $('#categories').replaceWith(responseData[0]);
+                    $('#categories').replaceWith(response[0]);
                     // Response only contains Items response if it's necessary to re-render
-                    if (responseData.length > 1) {
-                        $('#items').replaceWith(responseData[1]);
+                    if (response.length > 1) {
+                        $('#items').replaceWith(response[1]);
                     }
                 },
                 null
@@ -286,23 +267,32 @@ $(function() {
             formData.append('request_data', JSONPost);
             formData.append('file_data', file_data);
 
-            $.ajax({
-                url: '/catalog',
-                type: 'POST',
-                data: formData,
-                cache: false,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#items').replaceWith(responseData[0]);
+            process(
+                formData,
+                function(response) {
+                    $('#items').replaceWith(response[0]);
                 },
-                error: function(textStatus) {
-                    alert('Errors: ' + textStatus);
-                }
-            });
+                null
+            );
+
+            // $.ajax({
+            //     url: '/catalog',
+            //     type: 'POST',
+            //     data: formData,
+            //     cache: false,
+            //     processData: false,
+            //     contentType: false,
+            //     dataType: 'json',
+            //     success: function(response) {
+            //
+            //         // responseData = JSON.parse(response);
+            //
+            //         $('#items').replaceWith(response[0]);
+            //     },
+            //     error: function(textStatus) {
+            //         alert('Errors: ' + textStatus);
+            //     }
+            // });
         })
 
 
@@ -325,10 +315,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#viewItem').find('.modal-body').replaceWith(responseData[0]);
+                    $('#viewItem').find('.modal-body').replaceWith(response[0]);
                 },
                 null
             );
@@ -360,10 +347,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#items').replaceWith(responseData[0]);
+                    $('#items').replaceWith(response[0]);
                 },
                 null
             );
@@ -387,10 +371,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-
-                    responseData = JSON.parse(response);
-
-                    $('#items').replaceWith(responseData[0]);
+                    $('#items').replaceWith(response[0]);
                 },
                 null
             );
@@ -405,6 +386,7 @@ $(function() {
 
     $('#addItem').on('hidden.bs.modal', function() {
         $(this).find('form').prop('id', 'itemForm');
+        uploadFile = null;
     });
 
     $('#editItem').on('hidden.bs.modal', function() {
