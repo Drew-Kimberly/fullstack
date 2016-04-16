@@ -267,7 +267,7 @@ Items
 .previewImage {
     width: auto;
     height: auto;
-    max-width: 500px;
+    max-width: 400px;
     max-height: 250px;
     display: block;
     margin: auto;
@@ -434,6 +434,10 @@ Items
 
 .editImgOptionsWrapper {
     text-align: center;
+}
+
+#newItemForm .editImgOptionsWrapper {
+    display: none;
 }
 
 .deleteImage {

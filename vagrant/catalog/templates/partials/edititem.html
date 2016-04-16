@@ -32,11 +32,11 @@
                 <div class="form-group">
                     {% if items[0].image_id %}
                     <div class="imageContainer">
-                        <img class="previewImage" src="static/img/{{ items[0].image.name }}" />
+                        <img class="previewImage" src="static/img/{{ items[0].image_id}}{{items[0].image.extension }}" />
                     </div>
                     <div class="editImgOptionsWrapper">
                         <div class="editImgOptions">
-                            <input type="file" id="updateImageUpload" />
+                            <input type="file" id="updateImageUpload" class="fileInput" />
                             <label for="updateImageUpload">Update Image</label>
                             <a class="deleteImage" href="#">Remove</a>
                         </div>

@@ -1,6 +1,8 @@
 /*
  */
 
+ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif'];
+
 var formData;
 var requestData = {};
 var JSONPost;
@@ -117,20 +119,36 @@ $(function() {
         //Reference: http://www.html5rocks.com/en/tutorials/file/dndfiles/
         .on('change', '.fileInput', function(e) {
             uploadFile = e.target.files[0];
+            if ($.inArray(uploadFile.name.split('.').pop().toLowerCase(), ALLOWED_EXTENSIONS) == -1) {
+                var fileInput = $(this);
+                fileInput.val("");
+                alert('File extension is not allowed!');
+                return;
+            }
+
             var reader = new FileReader();
+            var itemForm = $(this.form);
 
             //Show the image in the modal when it loads
             reader.onload = function(e) {
-                var container = $('.imageContainer');
-                container.removeClass('noImage');
+                var container = itemForm.find('.imageContainer');
+                var prevImage = itemForm.find('.previewImage');
+                if (prevImage.length > 0) {
+                    prevImage.remove();
+                }
+                else {
+                    container.removeClass('noImage');
+                    container.children('#itemImageUpload').remove();
+                }
                 container.prepend('<img class="previewImage" src="' + e.target.result + '" />');
-                container.children('#itemImageUpload').hide();
             };
 
             reader.readAsDataURL(uploadFile);
 
-        });
+            //Show edit image options
+            $('#newItemForm').find('.editImgOptionsWrapper').show();
 
+        });
 
 
     //Core CRUD logic
@@ -274,25 +292,6 @@ $(function() {
                 },
                 null
             );
-
-            // $.ajax({
-            //     url: '/catalog',
-            //     type: 'POST',
-            //     data: formData,
-            //     cache: false,
-            //     processData: false,
-            //     contentType: false,
-            //     dataType: 'json',
-            //     success: function(response) {
-            //
-            //         // responseData = JSON.parse(response);
-            //
-            //         $('#items').replaceWith(response[0]);
-            //     },
-            //     error: function(textStatus) {
-            //         alert('Errors: ' + textStatus);
-            //     }
-            // });
         })
 
 
@@ -330,6 +329,7 @@ $(function() {
             var itemName = editItemForm.find('#itemName').val();
             var categoryID = editItemForm.find('#itemCategory').val();
             var description = editItemForm.find('#itemDescription').val();
+            var file_data = uploadFile ? uploadFile : null;
             formData = new FormData();
 
             requestData =
@@ -341,8 +341,15 @@ $(function() {
                 "description": description
             };
 
+            if (file_data) {
+                requestData["file_size"] = file_data.size;
+                requestData["file_type"] = file_data.type;
+            }
+
             JSONPost = JSON.stringify(requestData);
+
             formData.append('request_data', JSONPost);
+            formData.append('file_data', file_data);
 
             process(
                 formData,
@@ -375,6 +382,22 @@ $(function() {
                 },
                 null
             );
+        })
+
+
+        //Delete Item Image
+        .on('click', '.deleteImage', function(e) {
+            uploadFile = null;
+
+            var container = $('.imageContainer');
+            var image = $('.previewImage');
+            var imageOptions = $('.editImgOptionsWrapper');
+
+            image.remove();
+            imageOptions.hide();
+            container.addClass('noImage');
+            //container.children('input').each().remove();
+            container.append('<input type="file" id="itemImageUpload" class="fileInput" />');
         });
 
 
@@ -391,5 +414,6 @@ $(function() {
 
     $('#editItem').on('hidden.bs.modal', function() {
         $(this).find('form').prop('id', 'itemForm');
+        uploadFile = null;
     });
 });

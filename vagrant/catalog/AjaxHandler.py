@@ -185,15 +185,25 @@ class AjaxHandler:
                         ))
                     except Exception as e:
                         is_error = True
+                        self.db_session.rollback()
                         print(e.message)
 
                     # Save image to filesystem (static/img/)
                     if not is_error:
-                        self.posted_file.save(os.path.join(Util.UPLOAD_FOLDER, item_image.name))
+                        try:
+                            self.posted_file.save(
+                                os.path.join(Util.UPLOAD_FOLDER, str(item_image.image_id)+item_image.extension))
+                        except Exception as e:
+                            is_error = True
+                            self.db_session.rollback()
+                            if issubclass(type(e), OSError):
+                                print(e.strerror)
+                            else:
+                                print(e.message)
+
                 else:
                     # Not an image - flash error message and do not save item
                     is_error = True
-                    print(e.message)
                     error_message = "Uploaded file must be an image format."
                     pass
             else:
@@ -204,8 +214,9 @@ class AjaxHandler:
                         category_id=item_category_id,
                         description=item_description
                     ))
-                except Exception:
+                except Exception as e:
                     is_error = True
+                    self.db_session.rollback()
                     print(e.message)
 
             if not is_error:
@@ -228,15 +239,36 @@ class AjaxHandler:
             # Delete Item from database
             item_id = self.posted_data["item_id"]
             item_to_delete = self.db_session.query(Item).filter_by(item_id=item_id).first()
-            image_name = ""
+            is_error = False
+            image_id = None
+            image_ext = None
             if item_to_delete.image_id:
-                image_name = item_to_delete.image.name
-            self.db_session.delete(item_to_delete)
-            self.db_session.commit()
+                image_id = item_to_delete.image_id
+                image_ext = item_to_delete.image.extension
 
-            # Delete Item image from filesystem if it exists
-            if os.path.isfile(Util.UPLOAD_FOLDER + '/' + image_name):
-                os.remove(Util.UPLOAD_FOLDER + '/' + image_name)
+                # Delete Image entity from database
+                try:
+                    image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                    self.db_session.delete(image)
+                except Exception as e:
+                    is_error = True
+                    self.db_session.rollback()
+                    print(e.message)
+
+            try:
+                self.db_session.delete(item_to_delete)
+                if image_id and image_ext:
+                    os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id)+image_ext))
+            except Exception as e:
+                is_error = True
+                self.db_session.rollback()
+                if issubclass(type(e), OSError):
+                    print(e.strerror)
+                else:
+                    print(e.message)
+
+            if not is_error:
+                self.db_session.commit()
 
             # Query and return all items
             items = self.db_session.query(Item).all()
@@ -244,13 +276,111 @@ class AjaxHandler:
             return ResponseData(None, items, templates)
 
         elif self.action_type == 'EditItem':
+            is_error = False
             item_id = self.posted_data["item_id"]
             item_to_edit = self.db_session.query(Item).filter_by(item_id=item_id).first()
-            item_to_edit.name = self.posted_data["item_name"]
-            item_to_edit.category_id = self.posted_data["category_id"]
-            item_to_edit.description = self.posted_data["description"]
-            self.db_session.add(item_to_edit)
-            self.db_session.commit()
+            image_id = item_to_edit.image_id
+
+            if self.posted_file:
+                if Util.is_image(self.posted_file.filename):
+                    image_name = secure_filename(self.posted_file.filename)
+                    image_extension = os.path.splitext(image_name)[1]
+                    image_friendly_name = os.path.splitext(image_name)[0]
+                    image_size = self.posted_data["file_size"],
+                    image_type = self.posted_data["file_type"]
+
+                    if image_id:
+                        # Item already has an associated image
+                        try:
+                            item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                            item_image.name = image_name
+                            item_image.extension = image_extension
+                            item_image.friendly_name = image_friendly_name
+                            item_image.size = image_size
+                            item_image.type = image_type
+
+                            self.db_session.add(item_image)
+                        except Exception as e:
+                            is_error = True
+                            self.db_session.rollback()
+                            print(e.message)
+                    else:
+                        # Item has no associated image
+                        try:
+                            item_image = ItemImage(
+                                name=image_name,
+                                extension=image_extension,
+                                friendly_name=image_friendly_name,
+                                size=image_size,
+                                type=image_type
+                            )
+                            self.db_session.add(item_image)
+                            self.db_session.flush()
+
+                            item_to_edit.image_id = item_image.image_id
+                        except Exception as e:
+                            is_error = True
+                            self.db_session.rollback()
+                            print(e.message)
+
+                    # Save uploaded image to filesystem (/static/img/)
+                    if not is_error:
+                        try:
+                            self.posted_file.save(
+                                os.path.join(Util.UPLOAD_FOLDER, str(item_image.image_id) + item_image.extension))
+                        except Exception as e:
+                            is_error = True
+                            self.db_session.rollback()
+                            if issubclass(type(e), OSError):
+                                print(e.strerror)
+                            else:
+                                print(e.message)
+
+                else:
+                    # Not an image - BAD REQUEST (shouldn't have gotten through client-side validation)
+                    is_error = True
+                    error_message = "Uploaded file must be an image format."
+                    pass
+            elif image_id:
+                # Case where user deletes previous image and posts Item without uploading a new image
+                image_extension = item_to_edit.image.extension
+
+                # Disassociate the Item with the image's ID
+                item_to_edit.image_id = None
+
+                # Remove the Image from the ItemImage table
+                try:
+                    item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                    self.db_session.delete(item_image)
+                except Exception as e:
+                    is_error = True
+                    self.db_session.rollback()
+                    print(e.message)
+
+                # Remove the image file from the File System
+                try:
+                    os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id) + image_extension))
+                except Exception as e:
+                    is_error = True
+                    self.db_session.rollback()
+                    if issubclass(type(e), OSError):
+                        print(e.strerror)
+                    else:
+                        print(e.message)
+
+            # Add non-image related posted data to the Item
+            try:
+                item_to_edit.name = self.posted_data["item_name"]
+                item_to_edit.category_id = self.posted_data["category_id"]
+                item_to_edit.description = self.posted_data["description"]
+                self.db_session.add(item_to_edit)
+            except Exception as e:
+                is_error = True
+                self.db_session.rollback()
+                print(e.message)
+
+            if not is_error:
+                self.db_session.commit()
 
             items = self.db_session.query(Item).all()
             templates = [ITEM_TEMPLATE]
