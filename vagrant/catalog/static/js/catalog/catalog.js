@@ -146,7 +146,7 @@ $(function() {
             reader.readAsDataURL(uploadFile);
 
             //Show edit image options
-            $('#newItemForm').find('.editImgOptionsWrapper').show();
+            itemForm.find('.editImgOptionsWrapper').show();
 
         });
 
@@ -314,7 +314,7 @@ $(function() {
             process(
                 formData,
                 function(response) {
-                    $('#viewItem').find('.modal-body').replaceWith(response[0]);
+                    $('#viewItem').find('.viewItemContainer').replaceWith(response[0]);
                 },
                 null
             );
@@ -330,7 +330,12 @@ $(function() {
             var categoryID = editItemForm.find('#itemCategory').val();
             var description = editItemForm.find('#itemDescription').val();
             var file_data = uploadFile ? uploadFile : null;
+            var has_file = file_data ? true : false;
             formData = new FormData();
+
+            if (editItemForm.find('.previewImage').length > 0) {
+                has_file = true;
+            }
 
             requestData =
             {
@@ -338,7 +343,8 @@ $(function() {
                 "item_id": itemID,
                 "item_name": itemName,
                 "category_id": categoryID,
-                "description": description
+                "description": description,
+                "has_file": has_file
             };
 
             if (file_data) {

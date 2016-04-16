@@ -113,16 +113,49 @@ class AjaxHandler:
 
         elif self.action_type == "DeleteCategory":
             category_id = self.posted_data["id"]
+            is_error = False
+
+            # Query for the category and its associated Items
             category_to_delete = self.db_session.query(Category).filter_by(category_id=category_id).first()
             category_items = self.db_session.query(Item).filter_by(category_id=category_id).all()
-            if len(category_items) > 0:
-                item_template = ITEM_TEMPLATE
-                for item in category_items:
-                    self.db_session.delete(item)
-            else:
-                item_template = None
-            self.db_session.delete(category_to_delete)
-            self.db_session.commit()
+
+            try:
+                if len(category_items) > 0:
+                    item_template = ITEM_TEMPLATE
+                    for item in category_items:
+                        if item.image_id:
+                            image = self.db_session.query(ItemImage).filter_by(image_id=item.image_id).first()
+                            image_id = image.image_id
+                            image_ext = image.extension
+
+                            # Remove Image ref from Item entity
+                            item.image_id = None
+
+                            # Remove Image entity from db
+                            self.db_session.delete(image)
+
+                            # Remove image from File System
+                            if image_id and image_ext:
+                                os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id) + image_ext))
+
+                        # Remove Item entity from db
+                        self.db_session.delete(item)
+                else:
+                    item_template = None
+
+                # Delete the Category
+                self.db_session.delete(category_to_delete)
+
+            except Exception as e:
+                is_error = True
+                self.db_session.rollback()
+                if issubclass(type(e), OSError):
+                    print(e.strerror)
+                else:
+                    print(e.message)
+
+            if not is_error:
+                self.db_session.commit()
 
             categories = self.db_session.query(Category).all()
             if item_template:
@@ -278,6 +311,7 @@ class AjaxHandler:
         elif self.action_type == 'EditItem':
             is_error = False
             item_id = self.posted_data["item_id"]
+            has_file = self.posted_data["has_file"]
             item_to_edit = self.db_session.query(Item).filter_by(item_id=item_id).first()
             image_id = item_to_edit.image_id
 
@@ -341,7 +375,7 @@ class AjaxHandler:
                     is_error = True
                     error_message = "Uploaded file must be an image format."
                     pass
-            elif image_id:
+            elif image_id and not has_file:
                 # Case where user deletes previous image and posts Item without uploading a new image
                 image_extension = item_to_edit.image.extension
 

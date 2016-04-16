@@ -468,3 +468,58 @@ Items
     cursor: pointer;
 }
 
+.viewItemImageContainer {
+    max-width: 500px;
+    max-height: 350px;
+    margin: 5% auto 2.5%;
+}
+.viewItemImage {
+    width: auto;
+    height: auto;
+    max-width: 500px;
+    max-height: 350px;
+    display: block;
+    margin: auto;
+}
+
+.viewItemName {
+    color: #001f3f;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.viewItemCategory {
+    color: #001f3f;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 18px !important;
+}
+
+.viewItemDescriptionWrapper {
+    text-align: center;
+    border: solid thin lightgrey;
+    padding: 5px;
+}
+.viewItemDescription {
+    color: #001f3f;
+    margin-top: 10.5px;
+}
+
+.viewItemNoImage {
+    width: 400px;
+    height: 250px;
+    margin: 5% auto 2.5%;
+    text-align: center;
+    background-color: #EFEFEF;
+    color: #cccccc;
+}
+.viewItemNoImageIcon {
+    font-size: 50px;
+}
+
+.viewItemNoImageText {
+    display: inline-block;
+    margin: 82px 0;
+}
+

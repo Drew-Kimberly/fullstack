@@ -1,24 +1,42 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="itemName">
-                <p>{{ items[0].name }}</p>
+<div class="viewItemContainer">
+    <div class="container-fluid">
+        <div class="row">
+            {% if items[0].image_id %}
+            <div class="viewItemImageContainer">
+                <img class="viewItemImage" src="static/img/{{ items[0].image_id}}{{items[0].image.extension }}" />
             </div>
-
-            <div class="itemCategory">
-                <p>{{ categories[0].name }}</p>
+            {% else %}
+            <div class="viewItemNoImage">
+                <div class="viewItemNoImageText">
+                    <i class="glyphicon glyphicon-camera viewItemNoImageIcon"></i>
+                    <p>No Image Available</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="viewItemName">
+                    <p>{{ items[0].name }}</p>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="imageContainer noImage">
-                <input type="file" class="fileInput" id="itemImageUpload">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="viewItemCategory">
+                    <p>Category: {{ categories[0].name }}</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <p>{{ items[0].description }}</p>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="viewItemDescriptionWrapper">
+                    <p class="viewItemDescription">{{ items[0].description }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
