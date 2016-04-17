@@ -17,6 +17,15 @@ Docs can be found here: https://alembic.readthedocs.org/en/latest/
 Base = declarative_base()
 
 
+class User(Base):
+    __tablename__ = 'catalog_user'
+
+    user_id = Column(Integer, primary_key=True)
+    email = Column(String(250), nullable=False, unique=True)
+    picture = Column(String(250))
+    name = Column(String(100), nullable=False)
+
+
 class ItemImage(Base):
     __tablename__ = 'item_image'
 
@@ -33,6 +42,10 @@ class Category(Base):
 
     name = Column(String(80), nullable=False, unique=True)
     category_id = Column(Integer, primary_key=True)
+    created_on = Column(DateTime, server_default=func.now())
+    last_updated = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    user_id = Column(Integer, ForeignKey('catalog_user.user_id'), nullable=False)
+    user = relationship(User)
 
     @property
     def serialize(self):
@@ -55,8 +68,10 @@ class Item(Base):
     # last_updated = Column(TIMESTAMP, nullable=False)  # MySQL
     category_id = Column(Integer, ForeignKey('category.category_id'), nullable=False)
     image_id = Column(Integer, ForeignKey('item_image.image_id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('catalog_user.user_id'), nullable=False)
     category = relationship(Category)
     image = relationship(ItemImage)
+    user = relationship(User)
 
     @property
     def serialize(self):

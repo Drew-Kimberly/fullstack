@@ -2,13 +2,14 @@ from flask import Flask, render_template, request, session, make_response, flash
 from AjaxHandler import AjaxHandler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base
+from database_setup import Base, User
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import json
 import httplib2
 import requests
 import random
 import string
+
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -40,7 +41,7 @@ def catalog():
                 else:
                     return False
             else:
-                # File included in request - first save the file in filesystem
+                # File included in request
                 image_file = request.files['file_data']
                 post_data = json.loads(request.form['request_data'])
 
@@ -52,9 +53,11 @@ def catalog():
                 if response_data:
                     return process_response(response_data)
                 else:
+                    # Flash error message... return something better
                     return False
         else:
             # Bad POST request - No post data
+            # Flash error message - Return something better
             return False
     else:
         return render_template('catalog.html')
@@ -140,6 +143,18 @@ def gconnect():
     session['picture'] = data['picture']
     session['email'] = data['email']
 
+    # If User doesn't exist, make a new one and add to database
+    current_user_id = get_user_id(session.get('email'))
+    if not current_user_id:
+        # New User - First add to DB
+        current_user_id = create_user(session)
+
+    # Add the user_id to the session
+    if current_user_id:
+        session['user_id'] = current_user_id
+    else:
+        raise ValueError("Error adding the user's ID to the Session")
+
     output = ''
     output += '<h1>Welcome, '
     output += session['username']
@@ -172,6 +187,7 @@ def gdisconnect():
         # Reset the user's session.
         del session['credentials']
         del session['gplus_id']
+        del session['user_id']
         del session['username']
         del session['email']
         del session['picture']
@@ -195,10 +211,41 @@ def process_response(response_data):
     response = []
     for template in response_data.templates:
         if template:
-            response.append(render_template(template, categories=response_data.categories,
-                                            items=response_data.items))
+            response.append(render_template(template, categories=response_data.categories, items=response_data.items))
 
     return json.dumps(response)
+
+
+def create_user(user_session):
+    try:
+        newUser = User(
+            name=user_session.get('username'),
+            email=user_session.get('email'),
+            picture=user_session.get('picture')
+        )
+        dbSession.add(newUser)
+    except Exception as e:
+        print(e.message)
+        dbSession.rollback()
+        return None
+
+    dbSession.commit()
+    user = dbSession.query(User).filter_by(email=user_session.get('email')).first()
+    return user.user_id
+
+
+def get_user(user_id):
+    user = dbSession.query(User).filter_by(user_id=user_id).first()
+    return user
+
+
+def get_user_id(email):
+    try:
+        user = dbSession.query(User).filter_by(email=email).first()
+        return user.user_id
+    except Exception as e:
+        print e.message
+        return None
 
 
 if __name__ == "__main__":

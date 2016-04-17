@@ -1,4 +1,5 @@
 import os
+from flask import session
 from database_setup import Item, Category, ItemImage
 from ResponseData import ResponseData
 import Util
@@ -6,6 +7,8 @@ from werkzeug.utils import secure_filename
 
 CATEGORY_TEMPLATE = 'partials/catalog_categories.html'
 ITEM_TEMPLATE = 'partials/catalog_items.html'
+
+UNRESTRICTED_ACTIONS = {'RenderCatalog', 'RenderItemForm', 'SelectItem'}
 
 
 class AjaxHandler:
@@ -59,10 +62,13 @@ class AjaxHandler:
         if not self.posted_data["action"]:
             return False
 
+        # Ensure user is authenticated when making restricted calls
+        if not session.get('username') and self.posted_data["action"] not in UNRESTRICTED_ACTIONS:
+            # Throw 401 Error
+            return False
+
         self.action_type = self.posted_data["action"]
-
         return True
-
 
     def processRequest(self):
         '''
@@ -79,19 +85,10 @@ class AjaxHandler:
             templates = [CATEGORY_TEMPLATE, ITEM_TEMPLATE]
             return ResponseData(categories, items, templates)
 
-        elif self.action_type == "GetCategories":
-            categories = self.db_session.query(Category).all()
-            template_name = None
-            return [template_name, categories]
-
-        elif self.action_type == "RenderCategories":
-            categories = self.db_session.query(Category).all()
-            template_name = 'partials/catalog_categories.html'
-            return [template_name, categories]
-
         elif self.action_type == "AddCategory":
             name = self.posted_data["name"]
-            self.db_session.add(Category(name=name))
+            user_id = session.get('user_id')
+            self.db_session.add(Category(name=name, user_id=user_id))
             self. db_session.commit()
             categories = self.db_session.query(Category).all()
 
@@ -103,79 +100,90 @@ class AjaxHandler:
             category_name = self.posted_data["name"]
 
             category_to_edit = self.db_session.query(Category).filter_by(category_id=category_id).first()
-            category_to_edit.name = category_name
-            self.db_session.add(category_to_edit)
-            self.db_session.commit()
 
-            categories = self.db_session.query(Category).all()
-            templates = [CATEGORY_TEMPLATE]
-            return ResponseData(categories, None, templates)
+            # Sanity check for user authorization
+            if category_to_edit.user_id == session.get('user_id'):
+                category_to_edit.name = category_name
+                self.db_session.add(category_to_edit)
+                self.db_session.commit()
+
+                categories = self.db_session.query(Category).all()
+                templates = [CATEGORY_TEMPLATE]
+                return ResponseData(categories, None, templates)
+            else:
+                # Throw 403 Error
+                print("User is not authorized to perform this action")
+                return None
 
         elif self.action_type == "DeleteCategory":
             category_id = self.posted_data["id"]
+            images_to_delete = []
             is_error = False
 
             # Query for the category and its associated Items
             category_to_delete = self.db_session.query(Category).filter_by(category_id=category_id).first()
             category_items = self.db_session.query(Item).filter_by(category_id=category_id).all()
 
-            try:
-                if len(category_items) > 0:
-                    item_template = ITEM_TEMPLATE
-                    for item in category_items:
-                        if item.image_id:
-                            image = self.db_session.query(ItemImage).filter_by(image_id=item.image_id).first()
-                            image_id = image.image_id
-                            image_ext = image.extension
+            # Sanity check for user authorization
+            if category_to_delete.user_id == session.get('user_id'):
+                try:
+                    if len(category_items) > 0:
+                        item_template = ITEM_TEMPLATE
+                        for item in category_items:
+                            if item.user_id == session.get('user_id'):
+                                # Can only delete category if you own the category AND all items associated to it
+                                # Wonky business-logic :/ Also highlights the need for roles in a permissioning system
+                                if item.image_id:
+                                    image = self.db_session.query(ItemImage).filter_by(image_id=item.image_id).first()
+                                    images_to_delete.append(str(image.image_id) + image.extension)
 
-                            # Remove Image ref from Item entity
-                            item.image_id = None
+                                    # Remove Image ref from Item entity
+                                    item.image_id = None
 
-                            # Remove Image entity from db
-                            self.db_session.delete(image)
+                                    # Remove Image entity from db
+                                    self.db_session.delete(image)
 
-                            # Remove image from File System
-                            if image_id and image_ext:
-                                os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id) + image_ext))
+                                # Remove Item entity from db
+                                self.db_session.delete(item)
+                            else:
+                                # User does not own every item within the category
+                                is_error = True
+                                error_message = "Delete Category Failed - " \
+                                                "This category contains items which you do not own"
+                                print(error_message)
+                    else:
+                        item_template = None
 
-                        # Remove Item entity from db
-                        self.db_session.delete(item)
+                    # Delete the Category
+                    self.db_session.delete(category_to_delete)
+
+                except Exception as e:
+                    is_error = True
+                    self.db_session.rollback()
+                    if issubclass(type(e), OSError):
+                        print(e.strerror)
+                    else:
+                        print(e.message)
+
+                if not is_error:
+                    self.db_session.commit()
+
+                    # Finally remove images from filesystem. Have to do this after the commit to
+                    # prevent users from deleting a category in which they only own some of the associated items
+                    for image_name in images_to_delete:
+                        os.remove(os.path.join(Util.UPLOAD_FOLDER, image_name))
+
+                categories = self.db_session.query(Category).all()
+                if item_template:
+                    items = self.db_session.query(Item).all()
                 else:
-                    item_template = None
+                    items = None
 
-                # Delete the Category
-                self.db_session.delete(category_to_delete)
-
-            except Exception as e:
-                is_error = True
-                self.db_session.rollback()
-                if issubclass(type(e), OSError):
-                    print(e.strerror)
-                else:
-                    print(e.message)
-
-            if not is_error:
-                self.db_session.commit()
-
-            categories = self.db_session.query(Category).all()
-            if item_template:
-                items = self.db_session.query(Item).all()
+                return ResponseData(categories, items, [CATEGORY_TEMPLATE, ITEM_TEMPLATE])
             else:
-                items = None
-
-            return ResponseData(categories, items, [CATEGORY_TEMPLATE, ITEM_TEMPLATE])
-
-        elif self.action_type == "GetItems":
-            items = self.db_session.query(Item).all()
-
-            template_name = None
-            return [template_name, items]
-
-        elif self.action_type == 'RenderItems':
-            items = self.db_session.query(Item).all()
-
-            template_name = 'partials/catalog_items.html'
-            return [template_name, items]
+                # Throw 403
+                print("User is not authorized to perform this action")
+                return None
 
         elif self.action_type == 'RenderItemForm':
             item_id = self.posted_data["item_id"]
@@ -194,6 +202,7 @@ class AjaxHandler:
             item_name = self.posted_data["name"]
             item_category_id = self.posted_data["category_id"]
             item_description = self.posted_data["description"]
+            user_id = session.get('user_id')
             is_error = False
 
             if self.posted_file:
@@ -214,7 +223,8 @@ class AjaxHandler:
                             name=item_name,
                             category_id=item_category_id,
                             description=item_description,
-                            image_id=item_image.image_id
+                            image_id=item_image.image_id,
+                            user_id=user_id
                         ))
                     except Exception as e:
                         is_error = True
@@ -245,7 +255,8 @@ class AjaxHandler:
                     self.db_session.add(Item(
                         name=item_name,
                         category_id=item_category_id,
-                        description=item_description
+                        description=item_description,
+                        user_id=user_id
                     ))
                 except Exception as e:
                     is_error = True
@@ -270,130 +281,31 @@ class AjaxHandler:
 
         elif self.action_type == 'DeleteItem':
             # Delete Item from database
+            is_error = False
             item_id = self.posted_data["item_id"]
             item_to_delete = self.db_session.query(Item).filter_by(item_id=item_id).first()
-            is_error = False
             image_id = None
             image_ext = None
-            if item_to_delete.image_id:
-                image_id = item_to_delete.image_id
-                image_ext = item_to_delete.image.extension
 
-                # Delete Image entity from database
+            # Sanity check for user authorization
+            if item_to_delete.user_id == session.get('user_id'):
+                if item_to_delete.image_id:
+                    image_id = item_to_delete.image_id
+                    image_ext = item_to_delete.image.extension
+
+                    # Delete Image entity from database
+                    try:
+                        image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                        self.db_session.delete(image)
+                    except Exception as e:
+                        is_error = True
+                        self.db_session.rollback()
+                        print(e.message)
+
                 try:
-                    image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
-                    self.db_session.delete(image)
-                except Exception as e:
-                    is_error = True
-                    self.db_session.rollback()
-                    print(e.message)
-
-            try:
-                self.db_session.delete(item_to_delete)
-                if image_id and image_ext:
-                    os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id)+image_ext))
-            except Exception as e:
-                is_error = True
-                self.db_session.rollback()
-                if issubclass(type(e), OSError):
-                    print(e.strerror)
-                else:
-                    print(e.message)
-
-            if not is_error:
-                self.db_session.commit()
-
-            # Query and return all items
-            items = self.db_session.query(Item).all()
-            templates = [ITEM_TEMPLATE]
-            return ResponseData(None, items, templates)
-
-        elif self.action_type == 'EditItem':
-            is_error = False
-            item_id = self.posted_data["item_id"]
-            has_file = self.posted_data["has_file"]
-            item_to_edit = self.db_session.query(Item).filter_by(item_id=item_id).first()
-            image_id = item_to_edit.image_id
-
-            if self.posted_file:
-                if Util.is_image(self.posted_file.filename):
-                    image_name = secure_filename(self.posted_file.filename)
-                    image_extension = os.path.splitext(image_name)[1]
-                    image_friendly_name = os.path.splitext(image_name)[0]
-                    image_size = self.posted_data["file_size"],
-                    image_type = self.posted_data["file_type"]
-
-                    if image_id:
-                        # Item already has an associated image
-                        try:
-                            item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
-                            item_image.name = image_name
-                            item_image.extension = image_extension
-                            item_image.friendly_name = image_friendly_name
-                            item_image.size = image_size
-                            item_image.type = image_type
-
-                            self.db_session.add(item_image)
-                        except Exception as e:
-                            is_error = True
-                            self.db_session.rollback()
-                            print(e.message)
-                    else:
-                        # Item has no associated image
-                        try:
-                            item_image = ItemImage(
-                                name=image_name,
-                                extension=image_extension,
-                                friendly_name=image_friendly_name,
-                                size=image_size,
-                                type=image_type
-                            )
-                            self.db_session.add(item_image)
-                            self.db_session.flush()
-
-                            item_to_edit.image_id = item_image.image_id
-                        except Exception as e:
-                            is_error = True
-                            self.db_session.rollback()
-                            print(e.message)
-
-                    # Save uploaded image to filesystem (/static/img/)
-                    if not is_error:
-                        try:
-                            self.posted_file.save(
-                                os.path.join(Util.UPLOAD_FOLDER, str(item_image.image_id) + item_image.extension))
-                        except Exception as e:
-                            is_error = True
-                            self.db_session.rollback()
-                            if issubclass(type(e), OSError):
-                                print(e.strerror)
-                            else:
-                                print(e.message)
-
-                else:
-                    # Not an image - BAD REQUEST (shouldn't have gotten through client-side validation)
-                    is_error = True
-                    error_message = "Uploaded file must be an image format."
-                    pass
-            elif image_id and not has_file:
-                # Case where user deletes previous image and posts Item without uploading a new image
-                image_extension = item_to_edit.image.extension
-
-                # Disassociate the Item with the image's ID
-                item_to_edit.image_id = None
-
-                # Remove the Image from the ItemImage table
-                try:
-                    item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
-                    self.db_session.delete(item_image)
-                except Exception as e:
-                    is_error = True
-                    self.db_session.rollback()
-                    print(e.message)
-
-                # Remove the image file from the File System
-                try:
-                    os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id) + image_extension))
+                    self.db_session.delete(item_to_delete)
+                    if image_id and image_ext:
+                        os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id)+image_ext))
                 except Exception as e:
                     is_error = True
                     self.db_session.rollback()
@@ -402,23 +314,136 @@ class AjaxHandler:
                     else:
                         print(e.message)
 
-            # Add non-image related posted data to the Item
-            try:
-                item_to_edit.name = self.posted_data["item_name"]
-                item_to_edit.category_id = self.posted_data["category_id"]
-                item_to_edit.description = self.posted_data["description"]
-                self.db_session.add(item_to_edit)
-            except Exception as e:
-                is_error = True
-                self.db_session.rollback()
-                print(e.message)
+                if not is_error:
+                    self.db_session.commit()
 
-            if not is_error:
-                self.db_session.commit()
+                # Query and return all items
+                items = self.db_session.query(Item).all()
+                templates = [ITEM_TEMPLATE]
+                return ResponseData(None, items, templates)
+            else:
+                # Throw a 403
+                print("User is unauthorized to perform this action")
+                return None
 
-            items = self.db_session.query(Item).all()
-            templates = [ITEM_TEMPLATE]
-            return ResponseData(None, items, templates)
+        elif self.action_type == 'EditItem':
+            is_error = False
+            item_id = self.posted_data["item_id"]
+            has_file = self.posted_data["has_file"]
+            item_to_edit = self.db_session.query(Item).filter_by(item_id=item_id).first()
+            image_id = item_to_edit.image_id
+
+            # Sanity check for user authorization
+            if item_to_edit.user_id == session.get('user_id'):
+                if self.posted_file:
+                    if Util.is_image(self.posted_file.filename):
+                        image_name = secure_filename(self.posted_file.filename)
+                        image_extension = os.path.splitext(image_name)[1]
+                        image_friendly_name = os.path.splitext(image_name)[0]
+                        image_size = self.posted_data["file_size"],
+                        image_type = self.posted_data["file_type"]
+
+                        if image_id:
+                            # Item already has an associated image
+                            try:
+                                item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                                item_image.name = image_name
+                                item_image.extension = image_extension
+                                item_image.friendly_name = image_friendly_name
+                                item_image.size = image_size
+                                item_image.type = image_type
+
+                                self.db_session.add(item_image)
+                            except Exception as e:
+                                is_error = True
+                                self.db_session.rollback()
+                                print(e.message)
+                        else:
+                            # Item has no associated image
+                            try:
+                                item_image = ItemImage(
+                                    name=image_name,
+                                    extension=image_extension,
+                                    friendly_name=image_friendly_name,
+                                    size=image_size,
+                                    type=image_type
+                                )
+                                self.db_session.add(item_image)
+                                self.db_session.flush()
+
+                                item_to_edit.image_id = item_image.image_id
+                            except Exception as e:
+                                is_error = True
+                                self.db_session.rollback()
+                                print(e.message)
+
+                        # Save uploaded image to filesystem (/static/img/)
+                        if not is_error:
+                            try:
+                                self.posted_file.save(
+                                    os.path.join(Util.UPLOAD_FOLDER, str(item_image.image_id) + item_image.extension))
+                            except Exception as e:
+                                is_error = True
+                                self.db_session.rollback()
+                                if issubclass(type(e), OSError):
+                                    print(e.strerror)
+                                else:
+                                    print(e.message)
+
+                    else:
+                        # Not an image - BAD REQUEST (shouldn't have gotten through client-side validation)
+                        is_error = True
+                        error_message = "Uploaded file must be an image format."
+                        pass
+                elif image_id and not has_file:
+                    # Case where user deletes previous image and posts Item without uploading a new image
+                    image_extension = item_to_edit.image.extension
+
+                    # Disassociate the Item with the image's ID
+                    item_to_edit.image_id = None
+
+                    # Remove the Image from the ItemImage table
+                    try:
+                        item_image = self.db_session.query(ItemImage).filter_by(image_id=image_id).first()
+                        self.db_session.delete(item_image)
+                    except Exception as e:
+                        is_error = True
+                        self.db_session.rollback()
+                        print(e.message)
+
+                    # Remove the image file from the File System
+                    try:
+                        os.remove(os.path.join(Util.UPLOAD_FOLDER, str(image_id) + image_extension))
+                    except Exception as e:
+                        is_error = True
+                        self.db_session.rollback()
+                        if issubclass(type(e), OSError):
+                            print(e.strerror)
+                        else:
+                            print(e.message)
+
+                # Add non-image related posted data to the Item
+                try:
+                    item_to_edit.name = self.posted_data["item_name"]
+                    item_to_edit.category_id = self.posted_data["category_id"]
+                    item_to_edit.description = self.posted_data["description"]
+                    self.db_session.add(item_to_edit)
+                except Exception as e:
+                    is_error = True
+                    self.db_session.rollback()
+                    print(e.message)
+
+                if not is_error:
+                    self.db_session.commit()
+
+                items = self.db_session.query(Item).all()
+                templates = [ITEM_TEMPLATE]
+                return ResponseData(None, items, templates)
+
+            else:
+                # Throw a 403
+                print("User is not authorized to perform this action")
+                return None
 
         else:
             return None

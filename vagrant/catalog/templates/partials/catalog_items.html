@@ -18,15 +18,15 @@
                             <p>{{ item.description }}</p>
                             <button type="button" class="btn btn-primary btn-sm btnViewItem"
                                     data-toggle="modal" data-target="#viewItem">View</button>
-                            {% if session['username'] %}
-                            <a class="itemIcon btn-delete" href="#" data-toggle="modal"
-                                    data-target="#deleteItem">
-                                <i class="glyphicon glyphicon-remove"></i>
-                            </a>
-                            <a class="itemIcon btn-edit" href="#" data-toggle="modal"
-                                    data-target="#editItem">
-                                <i class="glyphicon glyphicon-pencil"></i>
-                            </a>
+                            {% if session['username'] and item.user_id == session['username'] %}
+                                <a class="itemIcon btn-delete" href="#" data-toggle="modal"
+                                        data-target="#deleteItem">
+                                    <i class="glyphicon glyphicon-remove"></i>
+                                </a>
+                                <a class="itemIcon btn-edit" href="#" data-toggle="modal"
+                                        data-target="#editItem">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
                             {% endif %}
                         </div>
                     </a>
