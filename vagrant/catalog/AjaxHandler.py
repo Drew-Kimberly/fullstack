@@ -151,11 +151,13 @@ class AjaxHandler:
                                 error_message = "Delete Category Failed - " \
                                                 "This category contains items which you do not own"
                                 print(error_message)
+                                self.db_session.rollback()
                     else:
                         item_template = None
 
                     # Delete the Category
-                    self.db_session.delete(category_to_delete)
+                    if not is_error:
+                        self.db_session.delete(category_to_delete)
 
                 except Exception as e:
                     is_error = True

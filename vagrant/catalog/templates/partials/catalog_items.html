@@ -18,7 +18,7 @@
                             <p>{{ item.description }}</p>
                             <button type="button" class="btn btn-primary btn-sm btnViewItem"
                                     data-toggle="modal" data-target="#viewItem">View</button>
-                            {% if session['username'] and item.user_id == session['username'] %}
+                            {% if session['username'] and item.user_id == session['user_id'] %}
                                 <a class="itemIcon btn-delete" href="#" data-toggle="modal"
                                         data-target="#deleteItem">
                                     <i class="glyphicon glyphicon-remove"></i>
