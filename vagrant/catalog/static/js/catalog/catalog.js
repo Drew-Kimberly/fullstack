@@ -255,7 +255,7 @@ $(function() {
 
 
         //View All Categories
-        .on('click', '#viewAllCategories, #home', function(e) {
+        .on('click', '#viewAllCategories', function(e) {
             $('#items').find('li').show();
             $("#categories").find("div[class='categoryWrapper activeCategory']").removeClass('activeCategory');
         })

@@ -19,10 +19,12 @@
             <div id="categoriesContainer" class="col-md-3">
                 <h2 id="categoriesHeader">
                     Categories
-                    <button type="button" class="btn btn-primary btn-circle btn-add btn-add-category"
-                        data-toggle="modal" data-target="#addCategory" data-add="confirmAddCategory">
-                    <i class="glyphicon glyphicon-plus"></i>
-                    </button>
+                    {% if session['username'] %}
+                        <button type="button" class="btn btn-primary btn-circle btn-add btn-add-category"
+                            data-toggle="modal" data-target="#addCategory" data-add="confirmAddCategory">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        </button>
+                    {% endif %}
                 </h2>
                 <div class="viewAllWrapper">
                     <a href="#" id="viewAllCategories">View All</a>
@@ -30,10 +32,12 @@
                 {% include "partials/catalog_categories.html" %}
             </div>
             <div id="items-top">
-                <button type="button" class="btn btn-primary btn-add btn-add-item"
-                        data-toggle="modal" data-target="#addItem" data-add="confirmAddItem">
-                    New Item
-                </button>
+                {% if session['username'] %}
+                    <button type="button" class="btn btn-primary btn-add btn-add-item"
+                            data-toggle="modal" data-target="#addItem" data-add="confirmAddItem">
+                        New Item
+                    </button>
+                {% endif %}
             </div>
             <div id="itemsContainer" class="col-md-9">
                 {% include "partials/catalog_items.html" %}

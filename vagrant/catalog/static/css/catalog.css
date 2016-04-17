@@ -18,11 +18,6 @@ body {
     padding-right: 50px;
 }
 
-.navbar-brand {
-    float: left;
-    color: goldenrod;
-}
-
 .container-fluid {
     padding-left: 50px;
     padding-right: 50px;
@@ -78,6 +73,21 @@ Buttons
     float: right;
     margin-right: 5em;
 }
+
+
+
+/******************
+Authentication
+******************/
+#loginLink {
+    color: orangered !important;
+    font-size: 16px;
+}
+#loginWrapper {
+    float: right;
+    margin-right: 20px;
+}
+
 
 
 

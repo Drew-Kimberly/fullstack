@@ -7,14 +7,16 @@
                 <a id="{{ category.category_id }}" class="categoryLink" href="#">
                     {{ category.name }}
                 </a>
-                <a class="categoryIcon btn-edit" href="#" data-toggle="modal"
-                        data-target="#editCategory" data-edit="#confirmEditCategory">
-                    <i class="glyphicon glyphicon-pencil"></i>
-                </a>
-                <a class="categoryIcon btn-delete" href="#" data-toggle="modal"
-                        data-target="#deleteCategory" data-delete="#confirmDeleteCategory">
-                    <i class="glyphicon glyphicon-remove"></i>
-                </a>
+                {% if session['username'] %}
+                    <a class="categoryIcon btn-edit" href="#" data-toggle="modal"
+                            data-target="#editCategory" data-edit="#confirmEditCategory">
+                        <i class="glyphicon glyphicon-pencil"></i>
+                    </a>
+                    <a class="categoryIcon btn-delete" href="#" data-toggle="modal"
+                            data-target="#deleteCategory" data-delete="#confirmDeleteCategory">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </a>
+                {% endif %}
             </div>
         </li>
         {% endfor %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="../static/js/libraries/jquery-2.2.2.min.js"></script>
+    <link type="text/css" href="../static/css/libraries/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/js/libraries/bootstrap.min.js"></script>
+    <link type="text/css" href="../static/css/catalog.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/js/master.js"></script>
+    <script type="text/javascript" src="../static/js/catalog/login.js"></script>
+    <script src="//apis.google.com/js/platform.js?onload=start" async defer> </script>
+</head>
+<body>
+
+    {% include "partials/header.html" %}
+
+    <div class="content">
+        <div id="signinBtn">
+            <span class="g-signin"
+                data-scope="openid email"
+                data-clientid="1051491531531-dg1cqrmqv28hmrd8jv60trm2sir9o3is.apps.googleusercontent.com"
+                data-redirecturi="postmessage"
+                data-accesstype="offline"
+                data-cookiepolicy="single_host_origin"
+                data-callback="signInCallback"
+                data-approvalprompt="force">
+            </span>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function signInCallback(authResult) {
+            if (authResult['code']) {
+                //Hide the sign-in button
+                $('#signinBtn').attr('style', 'display: none');
+
+                //Send the one-time-use code to server
+                $.ajax({
+                    type: 'POST',
+                    url: '/gconnect?state={{STATE}}',
+                    processData: false,
+                    data: authResult['code'],
+                    contentType: 'application/octet-stream; charset=utf-8',
+                    success: function(response) {
+                        if (response) {
+                            $('#result').html('Login Successful!</br>' + response +
+                                '</br>Redirecting...');
+                            setTimeout(function() {
+                                window.location.href = "/catalog";
+                            }, 4000);
+                        }
+                        else if (authResult['error']) {
+                            console.log('There was an error: ' + authResult['error']);
+                        }
+                        else {
+                            $('#result').html('Failed to make a server-side call. Check your config and console.');
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error.message);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
