@@ -79,13 +79,74 @@ Buttons
 /******************
 Authentication
 ******************/
-#loginLink {
-    color: orangered !important;
+#loginLink, #logoutLink {
     font-size: 16px;
+}
+#logoutLink {
+    padding-left: 10px;
 }
 #loginWrapper {
     float: right;
     margin-right: 20px;
+}
+#loginLink:hover {
+    text-decoration: none;
+    color: #CCCCCC;
+}
+
+.profImageWrapper {
+    float: left;
+    margin-top: 5.5%;
+}
+.profImage {
+    max-width: 32px;
+    max-height: 32px;
+    height: auto;
+    width: auto;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+}
+
+#signinContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background-color: #CCCCCC;
+    min-width: 20%;
+    min-height: 20%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -webkit-border-radius: 10px;
+    -moz-border-radius:10px;
+    border-radius:10px;
+}
+
+#signInHeader {
+    color: #001f3f;
+    font-weight: bold;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    border-bottom: solid 1px darkgray;
+}
+
+#signInDescription {
+    color: #001f3f;
+    text-align: center;
+    padding-top: 10px;
+}
+
+#signInBtnContainer {
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+#signInBtns {
+    display: inline-block;
+    text-align: left;
 }
 
 
@@ -503,7 +564,13 @@ Items
     color: #001f3f;
     text-align: center;
     font-size: 18px;
-    margin-bottom: 18px !important;
+}
+
+.viewItemCreatedByWrapper {
+    color: #001f3f;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 24px !important;
 }
 
 .viewItemDescriptionWrapper {

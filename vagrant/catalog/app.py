@@ -156,16 +156,10 @@ def gconnect():
     else:
         raise ValueError("Error adding the user's ID to the Session")
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % session['username'])
-    print "done!"
-    return output
+    response = make_response(json.dumps("Success!"), 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 
 # Revoke a current user's token and reset their login session.
@@ -197,14 +191,13 @@ def fbconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     access_token = request.data
-    print "access token received %s " % access_token
 
     app_id = json.loads(open('fb_client_secrets.json', 'r').read())[
         'web']['app_id']
     app_secret = json.loads(
         open('fb_client_secrets.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token' \
+          '&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (app_id, app_secret, access_token)
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
 
@@ -215,9 +208,9 @@ def fbconnect():
     url = 'https://graph.facebook.com/v2.6/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
-    # print "url sent for API access:%s"% url
-    # print "API JSON result: %s" % result
+
     data = json.loads(result)
+
     session['provider'] = 'facebook'
     session['username'] = data["name"]
     session['email'] = data["email"]
@@ -246,28 +239,30 @@ def fbconnect():
     else:
         raise ValueError("Error adding the user's ID to the Session")
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += session['username']
-
-    output += '!</h1>'
-    output += '<img src="'
-    output += session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-
-    flash("Now logged in as %s" % session['username'])
-    return output
+    flash("Successfully Logged in as %s" % session['username'])
+    response = make_response(json.dumps('Success'), 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 
 @app.route('/fbdisconnect')
 def fbdisconnect():
-    facebook_id = session['facebook_id']
-    # The access token must me included to successfully logout
-    access_token = session['access_token']
+    access_token = session.get('access_token')
+    facebook_id = session.get('facebook_id')
+
+    # Only disconnect a connected user
+    if access_token is None:
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
-    return "you have been logged out"
+    result = json.loads(result)
+    if 'error' in result:
+        response = make_response(json.dumps('Failed to revoke token for given user'), 400)
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
 
 @app.route('/disconnect')

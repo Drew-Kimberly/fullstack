@@ -8,29 +8,42 @@
     <link type="text/css" href="../static/css/catalog.css" rel="stylesheet">
     <script type="text/javascript" src="../static/js/master.js"></script>
     <script type="text/javascript" src="../static/js/catalog/login.js"></script>
-    <script src="//apis.google.com/js/platform.js?onload=start" async defer> </script>
+    <script src="https://apis.google.com/js/platform.js?onload=start" async defer> </script>
 </head>
 <body>
 
     {% include "partials/header.html" %}
 
     <div class="content">
-        <div id="signinBtn">
-            <span class="g-signin"
-                data-scope="openid email"
-                data-clientid="1051491531531-dg1cqrmqv28hmrd8jv60trm2sir9o3is.apps.googleusercontent.com"
-                data-redirecturi="postmessage"
-                data-accesstype="offline"
-                data-cookiepolicy="single_host_origin"
-                data-callback="signInCallback"
-                data-approvalprompt="force">
-            </span>
+        <div id="signinContainer">
+            <h3 id="signInHeader">
+                Log In
+            </h3>
+            <p id="signInDescription">
+                Sign in with one of the following:
+            </p>
+            <div id="signInBtnContainer">
+                <div id="signInBtns">
+                    <div id="gplusSigninBtn">
+                        <div class="g-signin"
+                            data-scope="openid email"
+                            data-clientid="1051491531531-dg1cqrmqv28hmrd8jv60trm2sir9o3is.apps.googleusercontent.com"
+                            data-redirecturi="postmessage"
+                            data-accesstype="offline"
+                            data-cookiepolicy="single_host_origin"
+                            data-callback="signInCallback"
+                            data-approvalprompt="force"
+                            >
+                        </div>
+                    </div>
+
+                    <fb:login-button id="fbSignInBtn" scope="public_profile,email" onlogin="sendTokenToServer();"
+                                     data-size="large">
+                        Sign in with Facebook
+                    </fb:login-button>
+                </div>
+            </div>
         </div>
-
-        <div class="fb-login-button" data-size="large"
-                scope="public_profile,email" onlogin="sendTokenToServer();"></div>
-
-        <div id="result"></div>
     </div>
 
     {#  FACEBOOK Sign in#}
@@ -60,10 +73,8 @@
         // successful.  See statusChangeCallback() for when this call is made.
         function sendTokenToServer() {
             var access_token = FB.getAuthResponse()['accessToken'];
-            console.log(access_token);
-            console.log('Welcome!  Fetching your information.... ');
             FB.api('/me', function (response) {
-                console.log('Successful login for: ' + response.name);
+                $('#fbSignInBtn').attr('style', 'display: none');
                 $.ajax({
                     type: 'POST',
                     url: '/fbconnect?state={{STATE}}',
@@ -73,13 +84,9 @@
                     success: function (result) {
                         // Handle or verify the server response if necessary.
                         if (result) {
-                            $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
-                            setTimeout(function () {
                                 window.location.href = "/catalog";
-                            }, 4000);
-
                         } else {
-                            $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                            console.log('Failed to make a server-side call. Check your configuration and console.');
                         }
                     }
 
@@ -93,7 +100,7 @@
         function signInCallback(authResult) {
             if (authResult['code']) {
                 //Hide the sign-in button
-                $('#signinBtn').attr('style', 'display: none');
+                $('#gplusSigninBtn').attr('style', 'display: none');
 
                 //Send the one-time-use code to server
                 $.ajax({
@@ -104,17 +111,13 @@
                     contentType: 'application/octet-stream; charset=utf-8',
                     success: function(response) {
                         if (response) {
-                            $('#result').html('Login Successful!</br>' + response +
-                                '</br>Redirecting...');
-                            setTimeout(function() {
                                 window.location.href = "/catalog";
-                            }, 4000);
                         }
                         else if (authResult['error']) {
                             console.log('There was an error: ' + authResult['error']);
                         }
                         else {
-                            $('#result').html('Failed to make a server-side call. Check your config and console.');
+                            console.log('Failed to make a server-side call. Check your config and console.');
                         }
                     },
                     error: function(error) {
