@@ -174,7 +174,11 @@ $(function() {
             process(
                 formData,
                 function(response) {
-                    $('#categories').replaceWith(response[0]);
+                    var categoryDiv = $('#categories');
+                    if (categoryDiv.find('#noCategories').length > 0) {
+                        $('.btn-add-item').show();
+                    }
+                    categoryDiv.replaceWith(response[0]);
                 },
                 null
             );
@@ -232,7 +236,12 @@ $(function() {
             process(
                 formData,
                 function(response) {
-                    $('#categories').replaceWith(response[0]);
+                    var categoryDiv = $('#categories');
+                    if (categoryDiv.find('li').length == 1) {
+                        $('.btn-add-item').hide();
+                    }
+
+                    categoryDiv.replaceWith(response[0]);
                     // Response only contains Items response if it's necessary to re-render
                     if (response.length > 1) {
                         $('#items').replaceWith(response[1]);

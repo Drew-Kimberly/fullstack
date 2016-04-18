@@ -32,9 +32,13 @@
                 {% include "partials/catalog_categories.html" %}
             </div>
             <div id="items-top">
+                <div class="flash">
+{#                    Not going to use flash here since ajax-based... but create message flashing on client-side#}
+                </div>
                 {% if session['username'] %}
                     <button type="button" class="btn btn-primary btn-add btn-add-item"
-                            data-toggle="modal" data-target="#addItem" data-add="confirmAddItem">
+                            data-toggle="modal" data-target="#addItem" data-add="confirmAddItem"
+                            {% if not categories %} style="display: none" {% endif %}>
                         New Item
                     </button>
                 {% endif %}

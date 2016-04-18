@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, make_response, flash
 from AjaxHandler import AjaxHandler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User
+from database_setup import Base, User, Category
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import json
 import httplib2
@@ -60,7 +60,8 @@ def catalog():
             # Flash error message - Return something better
             return False
     else:
-        return render_template('catalog.html')
+        categories = dbSession.query(Category).all()
+        return render_template('catalog.html', categories=categories)
 
 
 @app.route('/login')
@@ -153,6 +154,8 @@ def gconnect():
     # Add the user_id to the session
     if current_user_id:
         session['user_id'] = current_user_id
+        # Update appropriate user info stored in the database
+        update_user(current_user_id)
     else:
         raise ValueError("Error adding the user's ID to the Session")
 
@@ -236,6 +239,8 @@ def fbconnect():
 
     if user_id:
         session['user_id'] = user_id
+        # Update appropriate user info stored in the database
+        update_user(user_id)
     else:
         raise ValueError("Error adding the user's ID to the Session")
 
@@ -320,9 +325,22 @@ def create_user(user_session):
     return user.user_id
 
 
-def get_user(user_id):
-    user = dbSession.query(User).filter_by(user_id=user_id).first()
-    return user
+def update_user(user_id):
+    try:
+        user = dbSession.query(User).filter_by(user_id=user_id).first()
+        is_changed = False
+        if user.name != session['username']:
+            is_changed = True
+            user.name = session['username']
+        if user.picture != session['picture']:
+            is_changed = True
+            user.picture = session['picture']
+        if is_changed:
+            dbSession.add(user)
+            dbSession.commit()
+    except Exception as e:
+        print(e.message + ' - when updating user info')
+        dbSession.rollback()
 
 
 def get_user_id(email):
