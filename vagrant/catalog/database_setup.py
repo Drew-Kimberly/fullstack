@@ -36,6 +36,18 @@ class ItemImage(Base):
     size = Column(Integer, nullable=False)
     type = Column(String(50), nullable=False)
 
+    @property
+    def serialize(self):
+        # Returns object data in easily serializeable format
+        return {
+            'image_id': self.image_id,
+            'name': self.name,
+            'friendly_name': self.friendly_name,
+            'extension': self.extension,
+            'size': self.size,
+            'type': self.type
+        }
+
 
 class Category(Base):
     __tablename__ = 'category'
@@ -53,6 +65,9 @@ class Category(Base):
         return {
             'name': self.name,
             'category_id': self.category_id,
+            'created_on': str(self.created_on),
+            'last_updated': str(self.last_updated),
+            'user_id': self.user_id
         }
 
 
@@ -80,6 +95,8 @@ class Item(Base):
             'name': self.name,
             'description': self.description,
             'item_id': self.item_id,
+            'created_on': str(self.created_on),
+            'last_updated': str(self.last_updated),
         }
 
 

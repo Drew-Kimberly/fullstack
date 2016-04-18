@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, session, make_response, flash, redirect, url_for
+from flask import Flask, render_template, request, session, make_response, flash, redirect, url_for, jsonify
 from AjaxHandler import AjaxHandler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User, Category
+from database_setup import Base, User, Category, Item
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 import json
 import httplib2
@@ -291,6 +291,27 @@ def disconnect():
         flash("The user did not have an active logged in session!")
         return redirect(url_for('catalog'))
 
+
+# JSON API Endpoint
+@app.route('/catalog/api/getcatalog/json')
+def getCatalog():
+    catalog = []
+    category_list = []
+    categories = dbSession.query(Category).all()
+    for category in categories:
+        category_obj = category.serialize
+        category_items = dbSession.query(Item).filter_by(category_id=category.category_id).all()
+        item_list = []
+        for item in category_items:
+            item_obj = item.serialize
+            if item.image_id:
+                item_obj['image'] = item.image.serialize
+            item_list.append(item_obj)
+        category_obj['items'] = item_list
+        category_list.append(category_obj)
+    catalog.append({"categories": category_list})
+
+    return json.dumps({"catalog": catalog})
 
 # Helper Functions
 
