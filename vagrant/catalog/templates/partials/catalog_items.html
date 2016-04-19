@@ -15,7 +15,7 @@
                         </div>
                         {% endif %}
                         <div class="mask">
-                            <p>{{ item.description }}</p>
+                            <p>{{ item.description|truncate(65) }}</p>
                             <button type="button" class="btn btn-primary btn-sm btnViewItem"
                                     data-toggle="modal" data-target="#viewItem">View</button>
                             {% if session['username'] and item.user_id == session['user_id'] %}
@@ -32,7 +32,7 @@
                     </a>
                 </div>
                 <span class="itemNameLabel">
-                        {{ item.name }}
+                        {{ item.name|truncate(30) }}
                 </span>
             </div>
         </li>

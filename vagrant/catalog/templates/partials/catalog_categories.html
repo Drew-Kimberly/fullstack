@@ -5,7 +5,7 @@
         <li>
             <div class="categoryWrapper">
                 <a id="{{ category.category_id }}" class="categoryLink" href="#">
-                    {{ category.name }}
+                    {{ category.name|truncate(50) }}
                 </a>
                 {% if session['username'] and category.user_id == session['user_id']  %}
                     <a class="categoryIcon btn-edit" href="#" data-toggle="modal"

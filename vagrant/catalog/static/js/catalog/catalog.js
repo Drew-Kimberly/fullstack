@@ -416,8 +416,7 @@ $(function() {
         });
 
 
-
-
+    
     $('#addCategory').on('hidden.bs.modal', function() {
         $('#newCategoryForm').find('#name').val('');
     });

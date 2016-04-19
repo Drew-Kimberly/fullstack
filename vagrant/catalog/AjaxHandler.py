@@ -1,9 +1,10 @@
 import os
-from flask import session
+from flask import session, make_response
 from database_setup import Item, Category, ItemImage
 from ResponseData import ResponseData
 import Util
 from werkzeug.utils import secure_filename
+import json
 
 CATEGORY_TEMPLATE = 'partials/catalog_categories.html'
 ITEM_TEMPLATE = 'partials/catalog_items.html'
@@ -12,17 +13,16 @@ UNRESTRICTED_ACTIONS = {'RenderCatalog', 'RenderItemForm', 'SelectItem'}
 
 
 class AjaxHandler:
-
-    '''This class...'''
+    '''
+    Incoming AJAX requests are handed off to this class by the route controller
+    for validation and processing
+    '''
 
     def __init__(self, db_session):
-        '''
-        '''
+
         self._db_session = db_session
         self._posted_data = None
         self._posted_file = None
-        self.user_state = None
-        self.action_context = None
         self.action_type = None
 
     # Properties
@@ -52,30 +52,37 @@ class AjaxHandler:
 
     def validateRequest(self):
         '''
+        Performs basic validation on an incoming request from the Catalog app.
         '''
 
         # Ensure we have posted data
         if not self.posted_data:
-            return False
+            response = make_response(json.dumps({"error": "Invalid request."}), 500)
+            return response
 
         # Ensure posted data contains an action
         if not self.posted_data["action"]:
-            return False
+            response = make_response(json.dumps({"error": "Invalid request."}), 500)
+            return response
 
         # Ensure user is authenticated when making restricted calls
         if not session.get('username') and self.posted_data["action"] not in UNRESTRICTED_ACTIONS:
-            # Throw 401 Error
-            return False
+            response = make_response(json.dumps({"error": "User is not authenticated."}), 401)
+            return response
 
         self.action_type = self.posted_data["action"]
-        return True
+        response = make_response(json.dumps({"success": "Valid request."}), 200)
+        return response
 
     def processRequest(self):
         '''
+        Does the work prompted by the posted request's given action_type.
         '''
 
         # Ensure request is good
-        if not self.validateRequest():
+        validation_response = self.validateRequest()
+        if validation_response.status_code != 200:
+            print(validation_response.response[0])
             return None
 
         # Determine request Action Type and execute respective logic
@@ -88,10 +95,14 @@ class AjaxHandler:
         elif self.action_type == "AddCategory":
             name = self.posted_data["name"]
             user_id = session.get('user_id')
-            self.db_session.add(Category(name=name, user_id=user_id))
-            self. db_session.commit()
-            categories = self.db_session.query(Category).all()
+            try:
+                self.db_session.add(Category(name=name, user_id=user_id))
+                self. db_session.commit()
+            except Exception as e:
+                print("Error adding category. - %s" % e.message)
+                self.db_session.rollback()
 
+            categories = self.db_session.query(Category).all()
             templates = [CATEGORY_TEMPLATE]
             return ResponseData(categories, None, templates)
 
@@ -103,9 +114,13 @@ class AjaxHandler:
 
             # Sanity check for user authorization
             if category_to_edit.user_id == session.get('user_id'):
-                category_to_edit.name = category_name
-                self.db_session.add(category_to_edit)
-                self.db_session.commit()
+                try:
+                    category_to_edit.name = category_name
+                    self.db_session.add(category_to_edit)
+                    self.db_session.commit()
+                except Exception as e:
+                    print("Error editing category - {0}".format(e.message))
+                    self.db_session.rollback()
 
                 categories = self.db_session.query(Category).all()
                 templates = [CATEGORY_TEMPLATE]
@@ -113,7 +128,7 @@ class AjaxHandler:
             else:
                 # Throw 403 Error
                 print("User is not authorized to perform this action")
-                return None
+                return make_response(json.dumps("403 - User is not authorized"), 403)
 
         elif self.action_type == "DeleteCategory":
             category_id = self.posted_data["id"]
@@ -163,12 +178,16 @@ class AjaxHandler:
                     is_error = True
                     self.db_session.rollback()
                     if issubclass(type(e), OSError):
-                        print(e.strerror)
+                        print("Error deleting category - {0}".format(e.strerror))
                     else:
-                        print(e.message)
+                        print("Error deleting category - {0}".format(e.message))
 
                 if not is_error:
-                    self.db_session.commit()
+                    try:
+                        self.db_session.commit()
+                    except Exception as e:
+                        print("Error deleting category - {0}".format(e.message))
+                        self.db_session.rollback()
 
                     # Finally remove images from filesystem. Have to do this after the commit to
                     # prevent users from deleting a category in which they only own some of the associated items
@@ -181,11 +200,11 @@ class AjaxHandler:
                 else:
                     items = None
 
-                return ResponseData(categories, items, [CATEGORY_TEMPLATE, ITEM_TEMPLATE])
+                return ResponseData(categories, items, [CATEGORY_TEMPLATE, item_template])
             else:
                 # Throw 403
                 print("User is not authorized to perform this action")
-                return None
+                return make_response(json.dumps("User is not authorized"), 403)
 
         elif self.action_type == 'RenderItemForm':
             item_id = self.posted_data["item_id"]
@@ -231,7 +250,7 @@ class AjaxHandler:
                     except Exception as e:
                         is_error = True
                         self.db_session.rollback()
-                        print(e.message)
+                        print("Error adding item - {0}".format(e.message))
 
                     # Save image to filesystem (static/img/)
                     if not is_error:
@@ -242,9 +261,9 @@ class AjaxHandler:
                             is_error = True
                             self.db_session.rollback()
                             if issubclass(type(e), OSError):
-                                print(e.strerror)
+                                print("Error adding item - {0}".format(e.strerror))
                             else:
-                                print(e.message)
+                                print("Error adding item - {0}".format(e.message))
 
                 else:
                     # Not an image - flash error message and do not save item
@@ -263,10 +282,14 @@ class AjaxHandler:
                 except Exception as e:
                     is_error = True
                     self.db_session.rollback()
-                    print(e.message)
+                    print("Error adding item - {0}".format(e.message))
 
             if not is_error:
-                self.db_session.commit()
+                try:
+                    self.db_session.commit()
+                except Exception as e:
+                    print("Error adding item - {0}".format(e.message))
+                    self.db_session.rollback()
 
             # Retrieve list of all items to display
             items = self.db_session.query(Item).all()
@@ -302,7 +325,7 @@ class AjaxHandler:
                     except Exception as e:
                         is_error = True
                         self.db_session.rollback()
-                        print(e.message)
+                        print("Error deleting item - {0}".format(e.message))
 
                 try:
                     self.db_session.delete(item_to_delete)
@@ -312,12 +335,16 @@ class AjaxHandler:
                     is_error = True
                     self.db_session.rollback()
                     if issubclass(type(e), OSError):
-                        print(e.strerror)
+                        print("Error deleting item - {0}".format(e.strerror))
                     else:
-                        print(e.message)
+                        print("Error deleting item - {0}".format(e.message))
 
                 if not is_error:
-                    self.db_session.commit()
+                    try:
+                        self.db_session.commit()
+                    except Exception as e:
+                        print("Error deleting item - {0}".format(e.message))
+                        self.db_session.rollback()
 
                 # Query and return all items
                 items = self.db_session.query(Item).all()
@@ -326,7 +353,7 @@ class AjaxHandler:
             else:
                 # Throw a 403
                 print("User is unauthorized to perform this action")
-                return None
+                return make_response(json.dumps("User is unathorized."), 403)
 
         elif self.action_type == 'EditItem':
             is_error = False
@@ -359,7 +386,7 @@ class AjaxHandler:
                             except Exception as e:
                                 is_error = True
                                 self.db_session.rollback()
-                                print(e.message)
+                                print("Error editing item - {0}".format(e.message))
                         else:
                             # Item has no associated image
                             try:
@@ -377,7 +404,7 @@ class AjaxHandler:
                             except Exception as e:
                                 is_error = True
                                 self.db_session.rollback()
-                                print(e.message)
+                                print("Error editing item - {0}".format(e.message))
 
                         # Save uploaded image to filesystem (/static/img/)
                         if not is_error:
@@ -388,9 +415,9 @@ class AjaxHandler:
                                 is_error = True
                                 self.db_session.rollback()
                                 if issubclass(type(e), OSError):
-                                    print(e.strerror)
+                                    print("Error editing item - {0}".format(e.strerror))
                                 else:
-                                    print(e.message)
+                                    print("Error editing item - {0}".format(e.message))
 
                     else:
                         # Not an image - BAD REQUEST (shouldn't have gotten through client-side validation)
@@ -411,7 +438,7 @@ class AjaxHandler:
                     except Exception as e:
                         is_error = True
                         self.db_session.rollback()
-                        print(e.message)
+                        print("Error editing item - {0}".format(e.message))
 
                     # Remove the image file from the File System
                     try:
@@ -420,9 +447,9 @@ class AjaxHandler:
                         is_error = True
                         self.db_session.rollback()
                         if issubclass(type(e), OSError):
-                            print(e.strerror)
+                            print("Error editing item - {0}".format(e.strerror))
                         else:
-                            print(e.message)
+                            print("Error editing item - {0}".format(e.message))
 
                 # Add non-image related posted data to the Item
                 try:
@@ -433,10 +460,14 @@ class AjaxHandler:
                 except Exception as e:
                     is_error = True
                     self.db_session.rollback()
-                    print(e.message)
+                    print("Error editing item - {0}".format(e.message))
 
                 if not is_error:
-                    self.db_session.commit()
+                    try:
+                        self.db_session.commit()
+                    except Exception as e:
+                        print("Error editing item - {0}".format(e.message))
+                        self.db_session.rollback()
 
                 items = self.db_session.query(Item).all()
                 templates = [ITEM_TEMPLATE]
@@ -445,7 +476,7 @@ class AjaxHandler:
             else:
                 # Throw a 403
                 print("User is not authorized to perform this action")
-                return None
+                return make_response(json.dumps("User is unauthorized"), 403)
 
         else:
             return None

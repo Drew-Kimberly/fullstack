@@ -40,6 +40,7 @@ def catalog():
                     return process_response(response_data)
                 else:
                     return False
+
             else:
                 # File included in request
                 image_file = request.files['file_data']
@@ -295,7 +296,7 @@ def disconnect():
 # JSON API Endpoint
 @app.route('/catalog/api/getcatalog/json')
 def getCatalog():
-    catalog = []
+    catalog_list = []
     category_list = []
     categories = dbSession.query(Category).all()
     for category in categories:
@@ -309,9 +310,9 @@ def getCatalog():
             item_list.append(item_obj)
         category_obj['items'] = item_list
         category_list.append(category_obj)
-    catalog.append({"categories": category_list})
+    catalog_list.append({"categories": category_list})
 
-    return json.dumps({"catalog": catalog})
+    return json.dumps({"catalog": catalog_list})
 
 # Helper Functions
 
