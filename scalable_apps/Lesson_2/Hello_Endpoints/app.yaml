@@ -6,11 +6,14 @@
 # TODO: Enter your application id below. If you have signed up
 # using cloud.google.com/console use the "project id" for your application
 # id.
-application: your-project-id
+application: obtuse-cloud-06824
 version: 1
 runtime: python27
 threadsafe: true
 api_version: 1
+
+inbound_services:
+- warmup
 
 # Handlers tell App Engine how to route requests to your application.
 handlers:
@@ -41,6 +44,7 @@ handlers:
 # development server or deployment tools.
 # TODO: List any other App Engine SDK libs you may need here.
 libraries:
+
 
 # You must include the Endpoints library if you wish to serve an API.
 - name: endpoints
