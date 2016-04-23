@@ -1,8 +1,11 @@
-application: p4-refresh
+application: obtuse-cloud-06824
 version: 1
 runtime: python27
 api_version: 1
 threadsafe: yes
+
+inbound_services:
+- warmup
 
 handlers:
 - url: /favicon\.ico

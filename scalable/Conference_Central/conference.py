@@ -17,6 +17,7 @@ from datetime import datetime
 import json
 import os
 import time
+import utils
 
 import endpoints
 from protorpc import messages
@@ -68,22 +69,25 @@ class ConferenceApi(remote.Service):
         ## TODO 2
         ## step 1: make sure user is authed
         ## uncomment the following lines:
-        # user = endpoints.get_current_user()
-        # if not user:
-        #     raise endpoints.UnauthorizedException('Authorization required')
-        profile = None
+        user = endpoints.get_current_user()
+        if not user:
+            raise endpoints.UnauthorizedException('Authorization required')
+
+        user_id = utils.getUserId(user)
+        profile_key = ndb.Key(Profile, user_id)
+
+        profile = profile_key.get()
         ## step 2: create a new Profile from logged in user data
         ## you can use user.nickname() to get displayName
         ## and user.email() to get mainEmail
         if not profile:
             profile = Profile(
-                userId = None,
-                key = None,
-                displayName = "Test", 
-                mainEmail= None,
+                key = profile_key,
+                displayName = user.nickname(),
+                mainEmail= user.email(),
                 teeShirtSize = str(TeeShirtSize.NOT_SPECIFIED),
             )
-
+            profile.put()
         return profile      # return Profile
 
     def _doProfile(self, save_request=None):
@@ -98,6 +102,8 @@ class ConferenceApi(remote.Service):
                     val = getattr(save_request, field)
                     if val:
                         setattr(prof, field, str(val))
+
+            prof.put()
 
         # return ProfileForm
         return self._copyProfileToForm(prof)
