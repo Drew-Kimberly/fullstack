@@ -68,6 +68,35 @@ class Game(ndb.Model):
         return cls._to_forms([cls._to_form(game) for game in active_games])
 
     @classmethod
+    def cancel_game(cls, request):
+        """
+        Removes a game that is currently in progress from the system. The game
+        is specificed by Key, contained in the request, and must belong to the currently
+        authenticated user.
+        """
+        # Get the current user - making sure it's authenticated
+        gplus_user = get_endpoints_current_user()
+        user = User.query(User.email == gplus_user.email()).get()
+
+        # Get the game specified by key in the request
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+
+        # Ensure the game exists
+        if not game:
+            raise endpoints.NotFoundException('Game not found!')
+
+        # Ensure the game is associated to the current user
+        if user.key != game.user:
+            raise endpoints.ForbiddenException("Cannot cancel another user's game!")
+
+        # Ensure the game is not completed
+        if game.game_over:
+            raise endpoints.ForbiddenException("Cannot cancel a game that has already been completed!")
+
+        # All good to remove the game from datastore
+        game.key.delete()
+
+    @classmethod
     @ndb.transactional(xg=True)
     def play_round(cls, request):
         """

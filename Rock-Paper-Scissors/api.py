@@ -119,6 +119,16 @@ class RockPaperScissorsApi(remote.Service):
         """Returns all of the currently authenticated User's games"""
         return Game.get_user_games()
 
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=StringMessage,
+                      path='game/{urlsafe_game_key}',
+                      name='cancel_game',
+                      http_method='DELETE')
+    def cancel_game(self, request):
+        """Cancels an active game. The game must belong to current user."""
+        Game.cancel_game(request)
+        return StringMessage(message='The game has been successfully cancelled!')
+
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
                       name='get_average_attempts_remaining',
