@@ -44,10 +44,14 @@ def get_by_urlsafe(urlsafe, model):
             raise endpoints.BadRequestException('Invalid Key')
         else:
             raise
+    try:
+        entity = key.get()
+    except Exception as e:
+        return None
 
-    entity = key.get()
     if not entity:
         return None
+
     if not isinstance(entity, model):
         raise ValueError('Incorrect Kind')
     return entity

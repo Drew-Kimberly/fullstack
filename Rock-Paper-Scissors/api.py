@@ -82,11 +82,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_game(self, request):
         """Return the current game state."""
-        game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if game:
-            return game.to_form('Time to make a move!')
-        else:
-            raise endpoints.NotFoundException('Game not found!')
+        return Game.get_game(request)
 
     @endpoints.method(request_message=MAKE_MOVE_REQUEST,
                       response_message=GameForm,

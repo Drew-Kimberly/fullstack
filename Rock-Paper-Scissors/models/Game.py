@@ -10,7 +10,7 @@ from google.appengine.ext import ndb
 from api_forms import GameForm
 from Score import *
 from User import *
-from utils import get_endpoints_current_user
+from utils import *
 
 ROUNDS_OPTIONS = [1, 3, 5, 7]
 
@@ -35,6 +35,18 @@ class Game(ndb.Model):
         game = Game(user=user.key, total_rounds=request.total_rounds, remaining_rounds=request.total_rounds)
         game.put()
         return cls._to_form(game)
+
+    @classmethod
+    def get_game(cls, request):
+        """Returns an existing game in the application"""
+        # First verify the user is authenticated
+        get_endpoints_current_user()
+
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game:
+            return cls._to_form(game)
+        else:
+            raise endpoints.NotFoundException('Game not found!')
 
     @staticmethod
     def _to_form(game):
