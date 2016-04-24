@@ -8,7 +8,7 @@ import random
 
 from datetime import date
 from google.appengine.ext import ndb
-from api_forms import GameForm
+from api_forms import GameForm, GameForms
 from Score import *
 from User import *
 from utils import *
@@ -55,6 +55,17 @@ class Game(ndb.Model):
             return cls._to_form(game)
         else:
             raise endpoints.NotFoundException('Game not found!')
+
+    @classmethod
+    def get_user_games(cls):
+        """Returns all of the current User's active games"""
+        gplus_user = get_endpoints_current_user()
+        user = User.query(User.email == gplus_user.email()).get()
+
+        active_games = Game.query()\
+            .filter(Game.user == user.key)\
+            .filter(Game.game_over == False)
+        return cls._to_forms([cls._to_form(game) for game in active_games])
 
     @classmethod
     @ndb.transactional(xg=True)
@@ -133,6 +144,11 @@ class Game(ndb.Model):
         form.user_won_last_round = game.user_won_last_round
         form.total_ties = game.total_ties
         return form
+
+    @staticmethod
+    def _to_forms(games):
+        """Converts an array of Game ndb instances into a GameForms RPC message."""
+        return GameForms(games=games)
 
     def end_game(self, won=False):
         """Ends the game - if won is True, the player won. - if won is False,

@@ -33,6 +33,11 @@ class GameForm(messages.Message):
     cpu_wins = messages.IntegerField(12, required=True)
 
 
+class GameForms(messages.Message):
+    """Return multiple GameForm's"""
+    games = messages.MessageField(GameForm, 1, repeated=True)
+
+
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     total_rounds = messages.IntegerField(1, required=True, default=3)
@@ -60,7 +65,7 @@ class ScoreForm(messages.Message):
 
 
 class ScoreForms(messages.Message):
-    """Return multiple ScoreForms"""
+    """Return multiple ScoreForm's"""
     scores = messages.MessageField(ScoreForm, 1, repeated=True)
 
 

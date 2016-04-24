@@ -5,7 +5,6 @@ move game logic to another file. Ideally the API will be simple, concerned
 primarily with communication to/from the API's users."""
 
 
-import logging
 import endpoints
 
 from protorpc import remote
@@ -19,7 +18,7 @@ from models.User import *
 from models.Game import *
 from models.Score import *
 
-from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm
+from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm, GameForms
 from settings import WEB_CLIENT_ID
 
 
@@ -110,6 +109,15 @@ class RockPaperScissorsApi(remote.Service):
     def get_user_scores(self, request):
         """Returns all of the given User's scores"""
         return Score.get_user_scores(request)
+
+    @endpoints.method(request_message=message_types.VoidMessage,
+                      response_message=GameForms,
+                      path='user/games',
+                      name='get_user_games',
+                      http_method='GET')
+    def get_user_games(self, request):
+        """Returns all of the currently authenticated User's games"""
+        return Game.get_user_games()
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
