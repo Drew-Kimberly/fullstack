@@ -3,6 +3,8 @@ This file contains the class definition for the Game datastore entity,
 used by the Rock Paper Scissors application.
 """
 
+import endpoints
+
 from datetime import date
 from google.appengine.ext import ndb
 from api_forms import GameForm
@@ -28,7 +30,7 @@ class Game(ndb.Model):
         user = User.query(User.email == gplus_user.email()).get()
 
         if request.total_rounds not in ROUNDS_OPTIONS:
-            raise ValueError('Invalid total number of rounds. Must be an odd number in the set [1,7].')
+            raise endpoints.BadRequestException('Invalid total number of rounds. Must be an odd number in the set [1,7].')
 
         game = Game(user=user.key, total_rounds=request.total_rounds, remaining_rounds=request.total_rounds)
         game.put()

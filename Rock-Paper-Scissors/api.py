@@ -19,7 +19,7 @@ from models.User import *
 from models.Game import *
 from models.Score import *
 
-from api_forms import NewGameForm, MakeMoveForm, ScoreForms, StringMessage
+from api_forms import NewGameForm, MakeMoveForm, ScoreForms, StringMessage, UserMiniForm
 from utils import get_by_urlsafe
 from settings import WEB_CLIENT_ID
 
@@ -68,21 +68,11 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='POST')
     def new_game(self, request):
         """Creates a new Rock-Paper-Scissors game"""
-        # user = User.query(User.name == request.user_name).get()
-        # if not user:
-        #     raise endpoints.NotFoundException(
-        #             'A User with that name does not exist!')
-        # try:
-        #     game = Game.new_game(user.key, request.min,
-        #                          request.max, request.attempts)
-        # except ValueError:
-        #     raise endpoints.BadRequestException('Maximum must be greater '
-        #                                         'than minimum!')
 
         # Use a task queue to update the average attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
-        #taskqueue.add(url='/tasks/cache_average_attempts')
+        # taskqueue.add(url='/tasks/cache_average_attempts')
         return Game.new_game(request)
 
     @endpoints.method(request_message=GET_GAME_REQUEST,

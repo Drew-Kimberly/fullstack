@@ -5,7 +5,6 @@ used by the Rock Paper Scissors application.
 
 from google.appengine.ext import ndb
 from api_forms import UserForm
-from api_forms import UserMiniForm
 from utils import get_endpoints_current_user
 
 
