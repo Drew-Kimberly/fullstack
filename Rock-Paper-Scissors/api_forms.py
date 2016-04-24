@@ -61,7 +61,7 @@ class ScoreForm(messages.Message):
 
 class ScoreForms(messages.Message):
     """Return multiple ScoreForms"""
-    items = messages.MessageField(ScoreForm, 1, repeated=True)
+    scores = messages.MessageField(ScoreForm, 1, repeated=True)
 
 
 class StringMessage(messages.Message):

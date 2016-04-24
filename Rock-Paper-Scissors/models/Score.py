@@ -4,7 +4,8 @@ used by the Rock Paper Scissors application.
 """
 
 from google.appengine.ext import ndb
-from api_forms import ScoreForm
+from api_forms import ScoreForm, ScoreForms
+from utils import get_endpoints_current_user
 
 
 class Score(ndb.Model):
@@ -14,12 +15,27 @@ class Score(ndb.Model):
     won = ndb.BooleanProperty(required=True)
     victory_margin = ndb.IntegerProperty(required=True)
 
-    def to_form(self):
-        """"""
+    @classmethod
+    def get_scores(cls):
+        """Returns all Scores existing within the application."""
+        # Check that user is authenticated
+        get_endpoints_current_user()
+
+        scores = [cls._to_form(score) for score in Score.query()]
+        return cls._to_forms(scores)
+
+    @staticmethod
+    def _to_form(score):
+        """Converts a Score ndb instance into a ScoreForm RPC message"""
         return ScoreForm(
-            user_email=self.user.get().email,
-            user_name=self.user.get().displayName,
-            won=self.won,
-            date=str(self.date),
-            victory_margin=self.victory_margin
+            user_email=score.user.get().email,
+            user_name=score.user.get().displayName,
+            won=score.won,
+            date=str(score.date),
+            victory_margin=score.victory_margin
         )
+
+    @staticmethod
+    def _to_forms(scores):
+        """Converts an array of Score ndb instances into a ScoreForms RPC message."""
+        return ScoreForms(scores=scores)

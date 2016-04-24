@@ -19,7 +19,7 @@ from models.User import *
 from models.Game import *
 from models.Score import *
 
-from api_forms import NewGameForm, PlayRoundForm, ScoreForms, StringMessage, UserMiniForm
+from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm
 from settings import WEB_CLIENT_ID
 
 
@@ -97,7 +97,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_scores(self, request):
         """Return all scores"""
-        return ScoreForms(items=[score.to_form() for score in Score.query()])
+        return Score.get_scores()
 
     @endpoints.method(request_message=UserForm,
                       response_message=ScoreForms,
