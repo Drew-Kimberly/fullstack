@@ -24,9 +24,9 @@ class Game(ndb.Model):
     user_wins = ndb.IntegerProperty(required=True, default=0)
     cpu_wins = ndb.IntegerProperty(required=True, default=0)
     game_over = ndb.BooleanProperty(required=True, default=False)
-    user_last_move = ndb.StringProperty(required=True, default=None)
-    cpu_last_move = ndb.StringProperty(required=True, default=None)
-    user_won_last_round = ndb.BooleanProperty(default=None)
+    user_last_move = ndb.StringProperty()
+    cpu_last_move = ndb.StringProperty()
+    user_won_last_round = ndb.BooleanProperty()
     total_ties = ndb.IntegerProperty(required=True, default=0)
     user = ndb.KeyProperty(required=True, kind='User')
 
@@ -110,10 +110,6 @@ class Game(ndb.Model):
         # End the game if there is a winner
         rounds_to_win = (game.total_rounds / 2) + 1
         if game.cpu_wins == rounds_to_win or game.user_wins == rounds_to_win:
-            game.end_game(game.user_wins > game.cpu_wins)
-
-        # End the game if there are no remaining rounds
-        if game.remaining_rounds < 1:
             game.end_game(game.user_wins > game.cpu_wins)
 
         # Update Game in datastore

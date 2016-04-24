@@ -24,10 +24,13 @@ from settings import WEB_CLIENT_ID
 
 
 GET_GAME_REQUEST = endpoints.ResourceContainer(
-        urlsafe_game_key=messages.StringField(1),)
+        urlsafe_game_key=messages.StringField(1))
 PLAY_ROUND_REQUEST = endpoints.ResourceContainer(
     PlayRoundForm,
-    urlsafe_game_key=messages.StringField(1),)
+    urlsafe_game_key=messages.StringField(1))
+GET_USER_SCORES_REQUEST = endpoints.ResourceContainer(
+    email=messages.StringField(1, required=True)
+)
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -99,19 +102,14 @@ class RockPaperScissorsApi(remote.Service):
         """Return all scores"""
         return Score.get_scores()
 
-    @endpoints.method(request_message=UserForm,
+    @endpoints.method(request_message=GET_USER_SCORES_REQUEST,
                       response_message=ScoreForms,
-                      path='scores/user/{user_name}',
+                      path='scores/user',
                       name='get_user_scores',
                       http_method='GET')
     def get_user_scores(self, request):
-        """Returns all of an individual User's scores"""
-        user = User.query(User.name == request.user_name).get()
-        if not user:
-            raise endpoints.NotFoundException(
-                    'A User with that name does not exist!')
-        scores = Score.query(Score.user == user.key)
-        return ScoreForms(items=[score.to_form() for score in scores])
+        """Returns all of the given User's scores"""
+        return Score.get_user_scores(request)
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',

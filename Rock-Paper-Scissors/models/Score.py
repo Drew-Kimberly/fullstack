@@ -4,8 +4,10 @@ used by the Rock Paper Scissors application.
 """
 
 from google.appengine.ext import ndb
+from models.User import User
 from api_forms import ScoreForm, ScoreForms
 from utils import get_endpoints_current_user
+from endpoints.api_exceptions import NotFoundException
 
 
 class Score(ndb.Model):
@@ -23,6 +25,20 @@ class Score(ndb.Model):
 
         scores = [cls._to_form(score) for score in Score.query()]
         return cls._to_forms(scores)
+
+    @classmethod
+    def get_user_scores(cls, request):
+        """Returns all Scores associated with the current signed-in User"""
+        # Check that current user is authenticated
+        get_endpoints_current_user()
+
+        user = User.query(User.email == request.email).get()
+        if not user:
+            raise NotFoundException(
+                'A User with that email address does not exist!')
+
+        scores = Score.query(Score.user == user.key)
+        return cls._to_forms([cls._to_form(score) for score in scores])
 
     @staticmethod
     def _to_form(score):
