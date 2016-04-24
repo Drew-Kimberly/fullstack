@@ -30,6 +30,10 @@ PLAY_ROUND_REQUEST = endpoints.ResourceContainer(
 GET_USER_SCORES_REQUEST = endpoints.ResourceContainer(
     email=messages.StringField(1, required=True)
 )
+GET_HIGHSCORES_REQUEST = endpoints.ResourceContainer(
+    number_of_results=messages.IntegerField(1, default=0)
+)
+
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -128,6 +132,15 @@ class RockPaperScissorsApi(remote.Service):
         """Cancels an active game. The game must belong to current user."""
         Game.cancel_game(request)
         return StringMessage(message='The game has been successfully cancelled!')
+
+    @endpoints.method(request_message=GET_HIGHSCORES_REQUEST,
+                      response_message=ScoreForms,
+                      path='/highscores',
+                      name='get_high_scores',
+                      http_method='GET')
+    def get_high_scores(self, request):
+        """Returns a list of High Scores."""
+        return Score.get_high_scores(request)
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',

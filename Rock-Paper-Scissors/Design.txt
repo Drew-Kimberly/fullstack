@@ -1,0 +1,2 @@
+- How to break up game-logic, models, and endpoint definitions
+- Decision to use OAuth2 authentication throughout
