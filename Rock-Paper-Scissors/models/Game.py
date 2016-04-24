@@ -3,42 +3,47 @@ This file contains the class definition for the Game datastore entity,
 used by the Rock Paper Scissors application.
 """
 
-import random
 from datetime import date
 from google.appengine.ext import ndb
 from api_forms import GameForm
 from Score import *
+from User import *
+from utils import get_endpoints_current_user
+
+ROUNDS_OPTIONS = [1, 3, 5, 7]
 
 
 class Game(ndb.Model):
     """Game object"""
-    target = ndb.IntegerProperty(required=True)
-    attempts_allowed = ndb.IntegerProperty(required=True)
-    attempts_remaining = ndb.IntegerProperty(required=True, default=5)
+    total_rounds = ndb.IntegerProperty(required=True)
+    remaining_rounds = ndb.IntegerProperty(required=True)
+    user_wins = ndb.IntegerProperty(required=True, default=0)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
 
     @classmethod
-    def new_game(cls, user, min, max, attempts):
+    def new_game(cls, request):
         """Creates and returns a new game"""
-        if max < min:
-            raise ValueError('Maximum must be greater than minimum')
-        game = Game(user=user,
-                    target=random.choice(range(1, max + 1)),
-                    attempts_allowed=attempts,
-                    attempts_remaining=attempts,
-                    game_over=False)
-        game.put()
-        return game
+        gplus_user = get_endpoints_current_user()
+        user = User.query(User.email == gplus_user.email()).get()
 
-    def to_form(self, message):
+        if request.total_rounds not in ROUNDS_OPTIONS:
+            raise ValueError('Invalid total number of rounds. Must be an odd number in the set [1,7].')
+
+        game = Game(user=user.key, total_rounds=request.total_rounds, remaining_rounds=request.total_rounds)
+        game.put()
+        return cls._to_form(game)
+
+    @staticmethod
+    def _to_form(game):
         """Returns a GameForm representation of the Game"""
         form = GameForm()
-        form.urlsafe_key = self.key.urlsafe()
-        form.user_name = self.user.get().name
-        form.attempts_remaining = self.attempts_remaining
-        form.game_over = self.game_over
-        form.message = message
+        form.urlsafe_key = game.key.urlsafe()
+        form.user_email = game.user.get().email
+        form.user_name = game.user.get().displayName
+        form.total_rounds = game.total_rounds
+        form.remaining_rounds = game.remaining_rounds
+        form.game_over = game.game_over
         return form
 
     def end_game(self, won=False):

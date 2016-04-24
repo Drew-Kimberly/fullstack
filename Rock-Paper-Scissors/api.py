@@ -30,8 +30,6 @@ GET_GAME_REQUEST = endpoints.ResourceContainer(
 MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
     urlsafe_game_key=messages.StringField(1),)
-# USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
-#                                            email=messages.StringField(2))
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -63,29 +61,29 @@ class RockPaperScissorsApi(remote.Service):
         """Returns the current User profile."""
         return User.do_user_profile()
 
-    @endpoints.method(request_message=NEW_GAME_REQUEST,
+    @endpoints.method(request_message=NewGameForm,
                       response_message=GameForm,
                       path='game',
                       name='new_game',
                       http_method='POST')
     def new_game(self, request):
-        """Creates new game"""
-        user = User.query(User.name == request.user_name).get()
-        if not user:
-            raise endpoints.NotFoundException(
-                    'A User with that name does not exist!')
-        try:
-            game = Game.new_game(user.key, request.min,
-                                 request.max, request.attempts)
-        except ValueError:
-            raise endpoints.BadRequestException('Maximum must be greater '
-                                                'than minimum!')
+        """Creates a new Rock-Paper-Scissors game"""
+        # user = User.query(User.name == request.user_name).get()
+        # if not user:
+        #     raise endpoints.NotFoundException(
+        #             'A User with that name does not exist!')
+        # try:
+        #     game = Game.new_game(user.key, request.min,
+        #                          request.max, request.attempts)
+        # except ValueError:
+        #     raise endpoints.BadRequestException('Maximum must be greater '
+        #                                         'than minimum!')
 
         # Use a task queue to update the average attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
-        taskqueue.add(url='/tasks/cache_average_attempts')
-        return game.to_form('Good luck playing Guess a Number!')
+        #taskqueue.add(url='/tasks/cache_average_attempts')
+        return Game.new_game(request)
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
@@ -136,19 +134,19 @@ class RockPaperScissorsApi(remote.Service):
         """Return all scores"""
         return ScoreForms(items=[score.to_form() for score in Score.query()])
 
-    # @endpoints.method(request_message=USER_REQUEST,
-    #                   response_message=ScoreForms,
-    #                   path='scores/user/{user_name}',
-    #                   name='get_user_scores',
-    #                   http_method='GET')
-    # def get_user_scores(self, request):
-    #     """Returns all of an individual User's scores"""
-    #     user = User.query(User.name == request.user_name).get()
-    #     if not user:
-    #         raise endpoints.NotFoundException(
-    #                 'A User with that name does not exist!')
-    #     scores = Score.query(Score.user == user.key)
-    #     return ScoreForms(items=[score.to_form() for score in scores])
+    @endpoints.method(request_message=UserForm,
+                      response_message=ScoreForms,
+                      path='scores/user/{user_name}',
+                      name='get_user_scores',
+                      http_method='GET')
+    def get_user_scores(self, request):
+        """Returns all of an individual User's scores"""
+        user = User.query(User.name == request.user_name).get()
+        if not user:
+            raise endpoints.NotFoundException(
+                    'A User with that name does not exist!')
+        scores = Score.query(Score.user == user.key)
+        return ScoreForms(items=[score.to_form() for score in scores])
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
