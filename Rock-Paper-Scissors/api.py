@@ -19,16 +19,14 @@ from models.User import *
 from models.Game import *
 from models.Score import *
 
-from api_forms import NewGameForm, MakeMoveForm, ScoreForms, StringMessage, UserMiniForm
-from utils import get_by_urlsafe
+from api_forms import NewGameForm, PlayRoundForm, ScoreForms, StringMessage, UserMiniForm
 from settings import WEB_CLIENT_ID
 
 
-NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
         urlsafe_game_key=messages.StringField(1),)
-MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
-    MakeMoveForm,
+PLAY_ROUND_REQUEST = endpoints.ResourceContainer(
+    PlayRoundForm,
     urlsafe_game_key=messages.StringField(1),)
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -84,33 +82,14 @@ class RockPaperScissorsApi(remote.Service):
         """Return the current game state."""
         return Game.get_game(request)
 
-    @endpoints.method(request_message=MAKE_MOVE_REQUEST,
+    @endpoints.method(request_message=PLAY_ROUND_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
-                      name='make_move',
+                      name='play_round',
                       http_method='PUT')
-    def make_move(self, request):
-        """Makes a move. Returns a game state with message"""
-        game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if game.game_over:
-            return game.to_form('Game already over!')
-
-        game.attempts_remaining -= 1
-        if request.guess == game.target:
-            game.end_game(True)
-            return game.to_form('You win!')
-
-        if request.guess < game.target:
-            msg = 'Too low!'
-        else:
-            msg = 'Too high!'
-
-        if game.attempts_remaining < 1:
-            game.end_game(False)
-            return game.to_form(msg + ' Game over!')
-        else:
-            game.put()
-            return game.to_form(msg)
+    def play_round(self, request):
+        """Plays a round. Returns a game state"""
+        return Game.play_round(request)
 
     @endpoints.method(response_message=ScoreForms,
                       path='scores',

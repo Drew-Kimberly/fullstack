@@ -25,6 +25,12 @@ class GameForm(messages.Message):
     game_over = messages.BooleanField(4, required=True)
     user_email = messages.StringField(5, required=True)
     user_name = messages.StringField(6, required=True)
+    user_last_move = messages.StringField(7, required=True)
+    cpu_last_move = messages.StringField(8, required=True)
+    user_won_last_round = messages.BooleanField(9)
+    total_ties = messages.IntegerField(10, required=True)
+    user_wins = messages.IntegerField(11, required=True)
+    cpu_wins = messages.IntegerField(12, required=True)
 
 
 class NewGameForm(messages.Message):
@@ -32,17 +38,25 @@ class NewGameForm(messages.Message):
     total_rounds = messages.IntegerField(1, required=True, default=3)
 
 
-class MakeMoveForm(messages.Message):
+class PlayRoundForm(messages.Message):
     """Used to make a move in an existing game"""
-    guess = messages.IntegerField(1, required=True)
+    move = messages.EnumField('GameMove', 1, required=True)
+
+
+class GameMove(messages.Enum):
+    """GameMove -- RPS move enumeration value"""
+    ROCK = 1
+    PAPER = 2
+    SCISSORS = 3
 
 
 class ScoreForm(messages.Message):
     """ScoreForm for outbound Score information"""
-    user_name = messages.StringField(1, required=True)
-    date = messages.StringField(2, required=True)
-    won = messages.BooleanField(3, required=True)
-    guesses = messages.IntegerField(4, required=True)
+    user_email = messages.StringField(1, required=True)
+    user_name = messages.StringField(2, required=True)
+    date = messages.StringField(3, required=True)
+    won = messages.BooleanField(4, required=True)
+    victory_margin = messages.IntegerField(5, required=True)
 
 
 class ScoreForms(messages.Message):
