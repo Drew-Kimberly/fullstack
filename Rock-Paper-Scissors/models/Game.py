@@ -65,7 +65,7 @@ class Game(ndb.Model):
         active_games = Game.query()\
             .filter(Game.user == user.key)\
             .filter(Game.game_over == False)
-        return cls._to_forms([cls._to_form(game) for game in active_games])
+        return GameForms(games=[cls._to_form(game) for game in active_games])
 
     @classmethod
     def cancel_game(cls, request):
@@ -174,11 +174,6 @@ class Game(ndb.Model):
         form.total_ties = game.total_ties
         return form
 
-    @staticmethod
-    def _to_forms(games):
-        """Converts an array of Game ndb instances into a GameForms RPC message."""
-        return GameForms(games=games)
-
     def end_game(self, won=False):
         """Ends the game - if won is True, the player won. - if won is False,
         the player lost."""
@@ -189,3 +184,15 @@ class Game(ndb.Model):
         score = Score(user=self.user, date=date.today(), won=won,
                       victory_margin=self.user_wins - self.cpu_wins)
         score.put()
+
+        # Update the user's stats with the game result
+        user = self.user.get()
+        if won:
+            user.num_wins += 1
+        else:
+            user.num_losses += 1
+        user.total_victory_margin += (self.user_wins - self.cpu_wins)
+        user.put()
+
+
+

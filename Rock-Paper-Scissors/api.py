@@ -142,6 +142,15 @@ class RockPaperScissorsApi(remote.Service):
         """Returns a list of High Scores."""
         return Score.get_high_scores(request)
 
+    @endpoints.method(request_message=message_types.VoidMessage,
+                      response_message=UserRankForms,
+                      path='/user_rankings',
+                      name='get_user_rankings',
+                      http_method='GET')
+    def get_user_rankings(self, request):
+        """Returns a list of User Rankings, ordered by their total margin of victory."""
+        return User.get_user_rankings(request)
+
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
                       name='get_average_attempts_remaining',

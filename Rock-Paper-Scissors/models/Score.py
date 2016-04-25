@@ -5,7 +5,7 @@ used by the Rock Paper Scissors application.
 
 from google.appengine.ext import ndb
 from models.User import User
-from api_forms import ScoreForm, ScoreForms
+from api_forms import ScoreForm, ScoreForms, UserRankForm
 from utils import get_endpoints_current_user
 from endpoints.api_exceptions import NotFoundException
 from endpoints.api_exceptions import BadRequestException
@@ -24,8 +24,8 @@ class Score(ndb.Model):
         # Check that user is authenticated
         get_endpoints_current_user()
 
-        scores = [cls._to_form(score) for score in Score.query()]
-        return cls._to_forms(scores)
+        scores = Score.query()
+        return ScoreForms(scores=[cls._to_form(score) for score in scores])
 
     @classmethod
     def get_user_scores(cls, request):
@@ -39,7 +39,7 @@ class Score(ndb.Model):
                 'A User with that email address does not exist!')
 
         scores = Score.query(Score.user == user.key)
-        return cls._to_forms([cls._to_form(score) for score in scores])
+        return ScoreForms(scores=[cls._to_form(score) for score in scores])
 
     @classmethod
     def get_high_scores(cls, request):
@@ -62,7 +62,7 @@ class Score(ndb.Model):
         else:
             scores = Score.query().order(-Score.victory_margin).fetch(number_of_results)
 
-        return cls._to_forms([cls._to_form(score) for score in scores])
+        return ScoreForms(scores=[cls._to_form(score) for score in scores])
 
     @staticmethod
     def _to_form(score):
@@ -74,8 +74,3 @@ class Score(ndb.Model):
             date=str(score.date),
             victory_margin=score.victory_margin
         )
-
-    @staticmethod
-    def _to_forms(scores):
-        """Converts an array of Score ndb instances into a ScoreForms RPC message."""
-        return ScoreForms(scores=scores)

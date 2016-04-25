@@ -10,6 +10,9 @@ class UserForm(messages.Message):
     """UserForm for information about the current user profile"""
     displayName = messages.StringField(1)
     email = messages.StringField(2)
+    num_wins = messages.IntegerField(3, default=0)
+    num_losses = messages.IntegerField(4, default=0)
+    total_victory_margin = messages.IntegerField(5, default=0)
 
 
 class UserMiniForm(messages.Message):
@@ -67,6 +70,18 @@ class ScoreForm(messages.Message):
 class ScoreForms(messages.Message):
     """Return multiple ScoreForm's"""
     scores = messages.MessageField(ScoreForm, 1, repeated=True)
+
+
+class UserRankForm(messages.Message):
+    """UserRankForm for outbound individual user ranking information"""
+    email = messages.StringField(1, required=True)
+    displayName = messages.StringField(2, required=True)
+    total_victory_margin = messages.IntegerField(3, required=True, default=0)
+
+
+class UserRankForms(messages.Message):
+    """Return multiple UserRankForm's"""
+    user_ranks = messages.MessageField(UserRankForm, 1, repeated=True)
 
 
 class StringMessage(messages.Message):

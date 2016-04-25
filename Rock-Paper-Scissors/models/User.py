@@ -4,14 +4,17 @@ used by the Rock Paper Scissors application.
 """
 
 from google.appengine.ext import ndb
-from api_forms import UserForm
+from api_forms import UserForm, UserRankForm, UserRankForms
 from utils import get_endpoints_current_user
 
 
 class User(ndb.Model):
     """User -- User profile object"""
-    displayName = ndb.StringProperty()
-    email = ndb.StringProperty()
+    displayName = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
+    num_wins = ndb.IntegerProperty(required=True, default=0)
+    num_losses = ndb.IntegerProperty(required=True, default=0)
+    total_victory_margin = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
     def do_user_profile(cls, save_request=None):
@@ -31,6 +34,18 @@ class User(ndb.Model):
                     user_profile.put()
 
         return cls._to_form(user_profile)
+
+    @classmethod
+    def get_user_rankings(cls, request):
+        """
+        Returns a list of UserRank forms ordered in descending order
+        by total margin of victory.
+        """
+        # Ensure user is authenticated
+        get_endpoints_current_user()
+
+        users = User.query().order(-User.total_victory_margin)
+        return UserRankForms(user_ranks=[cls._to_rankform(user) for user in users])
 
     @staticmethod
     def _get_user_profile():
@@ -64,3 +79,14 @@ class User(ndb.Model):
 
         user_form.check_initialized()
         return user_form
+
+    @staticmethod
+    def _to_rankform(user):
+        """Given a User entity, returns a UserRankForm RPC message"""
+        user_rank_form = UserRankForm()
+        for field in user_rank_form.all_fields():
+            if hasattr(user, field.name):
+                setattr(user_rank_form, field.name, getattr(user, field.name))
+
+        user_rank_form.check_initialized()
+        return user_rank_form
