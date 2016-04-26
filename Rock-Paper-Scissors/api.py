@@ -18,7 +18,7 @@ from models.User import *
 from models.Game import *
 from models.Score import *
 
-from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm, GameForms
+from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm, GameForms, GameHistoryForm
 from settings import WEB_CLIENT_ID
 
 
@@ -150,6 +150,15 @@ class RockPaperScissorsApi(remote.Service):
     def get_user_rankings(self, request):
         """Returns a list of User Rankings, ordered by their total margin of victory."""
         return User.get_user_rankings(request)
+
+    @endpoints.method(request_message=GET_GAME_REQUEST,
+                      response_message=GameHistoryForm,
+                      path='game/{urlsafe_game_key}/history',
+                      name='get_game_history',
+                      http_method='GET')
+    def get_game_history(self, request):
+        """Returns the round-by-round result of an active or completed Game."""
+        return Game.get_game_history(request)
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',

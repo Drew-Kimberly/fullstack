@@ -8,7 +8,7 @@ import random
 
 from datetime import date
 from google.appengine.ext import ndb
-from api_forms import GameForm, GameForms
+from api_forms import GameForm, GameForms, GameHistoryForm, RoundHistoryForm
 from Score import *
 from User import *
 from utils import *
@@ -28,6 +28,9 @@ class Game(ndb.Model):
     cpu_last_move = ndb.StringProperty()
     user_won_last_round = ndb.BooleanProperty()
     total_ties = ndb.IntegerProperty(required=True, default=0)
+    user_moves = ndb.StringProperty(repeated=True)
+    cpu_moves = ndb.StringProperty(repeated=True)
+    round_results = ndb.IntegerProperty(repeated=True)
     user = ndb.KeyProperty(required=True, kind='User')
 
     @classmethod
@@ -117,25 +120,33 @@ class Game(ndb.Model):
 
         # Generate random move for the CPU
         cpu_move = random.choice(MOVES)
+        game.cpu_moves.append(cpu_move)
 
         # Game logic to determine winner
         user_move = request.move.name
+        game.user_moves.append(user_move)
+
         is_tie = False
         if cpu_move == user_move:
             is_tie = True
             game.user_won_last_round = None
+            game.round_results.append(-1)
         elif user_move == "ROCK" and cpu_move == "SCISSORS":
             game.user_wins += 1
             game.user_won_last_round = True
+            game.round_results.append(1)
         elif user_move == "PAPER" and cpu_move == "ROCK":
             game.user_wins += 1
             game.user_won_last_round = True
+            game.round_results.append(1)
         elif user_move == "SCISSORS" and cpu_move == "PAPER":
             game.user_wins += 1
             game.user_won_last_round = True
+            game.round_results.append(1)
         else:
             game.cpu_wins += 1
             game.user_won_last_round = False
+            game.round_results.append(0)
 
         # Handle ties - Only decrement the rounds remaining when the round is not a tie
         if is_tie:
@@ -156,6 +167,29 @@ class Game(ndb.Model):
         game.put()
         return cls._to_form(game)
 
+    @classmethod
+    def get_game_history(cls, request):
+        """
+        Returns the round-by-round result of an active or completed Game.
+        The game must be associated with the current authenticated user.
+        """
+        # Get the current user - making sure it's authenticated
+        gplus_user = get_endpoints_current_user()
+        user = User.query(User.email == gplus_user.email()).get()
+
+        # Get the game specified by key in the request
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+
+        # Ensure the game exists
+        if not game:
+            raise endpoints.NotFoundException('Game not found!')
+
+        # Ensure the game is associated to the current user
+        if user.key != game.user:
+            raise endpoints.ForbiddenException("You may only view the history of your own games!")
+
+        return cls._to_gamehistory_form(game)
+
     @staticmethod
     def _to_form(game):
         """Returns a GameForm representation of the Game"""
@@ -173,6 +207,28 @@ class Game(ndb.Model):
         form.user_won_last_round = game.user_won_last_round
         form.total_ties = game.total_ties
         return form
+
+    @staticmethod
+    def _to_gamehistory_form(game):
+        """Returns a GameHistoryForm RPC message from a Game entity"""
+        rounds = []
+        for i in range(len(game.user_moves)):
+            form = RoundHistoryForm()
+            form.user_move = game.user_moves[i]
+            form.cpu_move = game.cpu_moves[i]
+            if game.round_results[i] == -1:
+                form.is_tie = True
+                form.user_won = False
+            elif game.round_results[i] == 0:
+                form.is_tie = False
+                form.user_won = False
+            else:
+                form.is_tie = False
+                form.user_won = True
+
+            rounds.append(form)
+
+        return GameHistoryForm(game_history=rounds)
 
     def end_game(self, won=False):
         """Ends the game - if won is True, the player won. - if won is False,

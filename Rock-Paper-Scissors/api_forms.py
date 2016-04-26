@@ -51,6 +51,19 @@ class PlayRoundForm(messages.Message):
     move = messages.EnumField('GameMove', 1, required=True)
 
 
+class RoundHistoryForm(messages.Message):
+    """RoundHistoryForm for summarizing an already completed round."""
+    user_move = messages.StringField(1, required=True)
+    cpu_move = messages.StringField(2, required=True)
+    user_won = messages.BooleanField(3, required=True, default=False)
+    is_tie = messages.BooleanField(4, required=True, default=False)
+
+
+class GameHistoryForm(messages.Message):
+    """Consists of multiple RoundHistoryForm's to create a game history."""
+    game_history = messages.MessageField(RoundHistoryForm, 1, repeated=True)
+
+
 class GameMove(messages.Enum):
     """GameMove -- RPS move enumeration value"""
     ROCK = 1
