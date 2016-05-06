@@ -1,93 +1,171 @@
-#Full Stack Nanodegree Project 4 Refresh
+#Rock Paper Scissors API
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
- in the App Engine admin console and would like to use to host your instance of this sample.
+ in the App Engine admin console and would like to use to host your instance of this application.
 1.  Run the app with the devserver using dev_appserver.py DIR, and ensure it's
  running by visiting the API Explorer - by default localhost:8080/_ah/api/explorer.
+1.  This app requires Google+ Authentication. Update the value of WEB_CLIENT_ID in settings.py
+with your own Client ID from the Google API Console.
 1.  (Optional) Generate your client library(ies) with the endpoints tool.
  Deploy your application.
  
- 
- 
+
 ##Game Description:
-Guess a number is a simple guessing game. Each game begins with a random 'target'
-number between the minimum and maximum values provided, and a maximum number of
-'attempts'. 'Guesses' are sent to the `make_move` endpoint which will reply
-with either: 'too low', 'too high', 'you win', or 'game over' (if the maximum
-number of attempts is reached).
-Many different Guess a Number games can be played by many different Users at any
-given time. Each game can be retrieved or played by using the path parameter
-`urlsafe_game_key`.
+Rock Paper Scissors is a timeless classic. This application allows a user to play
+rock paper scissors games against a computer opponent. A game can contain 1, 3, 5,
+or 7 rounds. The game is a "best-of" series, where one player must win the majority
+of rounds to win the game. For example, if the game is set to 5 rounds - a player
+must win 3 rounds to win the game.
+
+Gameplay is straightforward. Each player can make 1 of 3 moves per
+round: 'Rock', 'Paper', or 'Scissors'. Each move beats exactly 1 other move.
+The breakdown of this is as follows:
+- Rock beats Scissors
+- Scissors beats Paper
+- Paper beats Rock
+
+If both players play the same move, a tie is declared. In this case, the round is not
+considered complete and both players must each make another move against eachother.
+Once the user wins/loses, the round is over and the round result is recorded.
+If an overall game winner has not been established, the players begin another round,
+and keep doing so until the game is completed.
+
+The application allows many different users to play many different Rock Paper Scissor
+games simultaneously. Users have the ability to view round-by-round results of their
+own completed or active games using the `get_game_history` endpoint. Users can also
+view how their all-time and single-game performances compare to other users' with
+the `get_high_scores` and `get_user_rankings` endpoints respectively. The user's games
+can be retrieved or played by using the path parameter `urlsafe_game_key`.
+
+<i>A user must authenticate using a Google+ sign-in in order to play!</i>
+
 
 ##Files Included:
- - api.py: Contains endpoints and game playing logic.
+ - api.py: Contains all endpoints for the application.
+ - api_forms.py: Contains message definitions for representing game data.
  - app.yaml: App configuration.
+ - settings.py: User configuration settings.
  - cron.yaml: Cronjob configuration.
  - main.py: Handler for taskqueue handler.
- - models.py: Entity and message definitions including helper methods.
- - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
+ - Game.py: Definition for Game entity and related application logic.
+ - Score.py: Definition for Score entity and related application logic.
+ - User.py: Definition for User entity and related application logic.
+ - utils.py: Helper functions used across the application.
+
 
 ##Endpoints Included:
- - **create_user**
+ - **save_user**
     - Path: 'user'
     - Method: POST
-    - Parameters: user_name, email (optional)
-    - Returns: Message confirming creation of the User.
-    - Description: Creates a new User. user_name provided must be unique. Will 
-    raise a ConflictException if a User with that user_name already exists.
+    - Auth Required: TRUE
+    - Parameters: display_name (optional)
+    - Returns: UserForm
+    - Description: Creates a new user profile if the sign in email does not exist in the system.
+        Otherwise, updates the user profile's information if there is a change.
+
+ - **get_user**
+    - Path: 'user'
+    - Method: GET
+    - Auth Required: TRUE
+    - Parameters: None
+    - Returns: UserForm
+    - Description: Returns the current authenticated User profile.
     
  - **new_game**
     - Path: 'game'
     - Method: POST
-    - Parameters: user_name, min, max, attempts
+    - Auth Required: TRUE
+    - Parameters: total_rounds
     - Returns: GameForm with initial game state.
-    - Description: Creates a new Game. user_name provided must correspond to an
-    existing user - will raise a NotFoundException if not. Min must be less than
-    max. Also adds a task to a task queue to update the average moves remaining
-    for active games.
+    - Description: Creates a new Rock-Paper-Scissors Game with the provided number of rounds
+     for the current authenticated User. The parameter total_rounds must be an integer within the set (1, 3, 5, 7).
      
  - **get_game**
     - Path: 'game/{urlsafe_game_key}'
     - Method: GET
+    - Auth Required: TRUE
     - Parameters: urlsafe_game_key
     - Returns: GameForm with current game state.
     - Description: Returns the current state of a game.
     
- - **make_move**
+ - **play_round**
     - Path: 'game/{urlsafe_game_key}'
     - Method: PUT
-    - Parameters: urlsafe_game_key, guess
+    - Auth Required: TRUE
+    - Parameters: urlsafe_game_key, move
     - Returns: GameForm with new game state.
-    - Description: Accepts a 'guess' and returns the updated state of the game.
+    - Description: Accepts a Rock-Paper-Scissors 'move' ('ROCK', 'PAPER', or 'SCISSORS') and plays a round of the
+    game using a randomized move by the computer opponent. The updated state of the game is then returned.
     If this causes a game to end, a corresponding Score entity will be created.
+    Users must be the owner the game they are requesting to play a round of, and the game must currently be active.
     
  - **get_scores**
     - Path: 'scores'
     - Method: GET
+    - Auth Required: TRUE
     - Parameters: None
     - Returns: ScoreForms.
-    - Description: Returns all Scores in the database (unordered).
+    - Description: Returns all Scores from all users in the database (unordered).
     
  - **get_user_scores**
-    - Path: 'scores/user/{user_name}'
+    - Path: 'scores/user'
     - Method: GET
-    - Parameters: user_name
+    - Auth Required: TRUE
+    - Parameters: email
     - Returns: ScoreForms. 
     - Description: Returns all Scores recorded by the provided player (unordered).
     Will raise a NotFoundException if the User does not exist.
-    
- - **get_active_game_count**
-    - Path: 'games/active'
+
+- **get_user_games**
+    - Path: 'user/games'
     - Method: GET
+    - Auth Required: TRUE
     - Parameters: None
-    - Returns: StringMessage
-    - Description: Gets the average number of attempts remaining for all games
-    from a previously cached memcache key.
+    - Returns: GameForms
+    - Description: Returns all of the currently authenticated User's active games (unordered).
+
+- **cancel_game**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: DELETE
+    - Auth Required: TRUE
+    - Parameters: urlsafe_game_key
+    - Returns: Message that the given game was successfully cancelled.
+    - Description: Cancels the game given by urlsafe_game_key. The game must belong to the current
+    authenticated user and be an active game.
+
+- **get_high_scores**
+    - Path: '/highscores'
+    - Method: 'GET'
+    - Auth Required: TRUE
+    - Parameters: number_of_results
+    - Returns: ScoreForms
+    - Description: By default returns a list of all Score entities in the database,
+    ordered descending by the User's margin of victory of the game. The parameter
+    number_of_results can be used to limit the number of Scores returned.
+
+- **get_user_rankings**
+    - Path: '/user_rankings'
+    - Method: GET
+    - Auth Required: TRUE
+    - Parameters: None
+    - Returns: UserRankForms
+    - Description: Returns a list of all User entities in the database,
+    ordered descending by the User's total margin of victory, which is returned
+    as the `total_victory_margin` field for each User.
+
+- **get_game_history**
+    - Path: 'game/{urlsafe_game_key}/history'
+    - Method: GET
+    - Auth Required: TRUE
+    - Parameters: urlsafe_game_key
+    - Returns: GameHistoryForm
+    - Description: Returns the round-by-round result of an active or completed Game.
+
 
 ##Models Included:
  - **User**
-    - Stores unique user_name and (optional) email address.
+    - Stores unique email, a display name, and user statistics.
     
  - **Game**
     - Stores unique game states. Associated with User model via KeyProperty.
@@ -96,17 +174,98 @@ given time. Each game can be retrieved or played by using the path parameter
     - Records completed games. Associated with Users model via KeyProperty.
     
 ##Forms Included:
+ - **UserForm**
+    - Representation of a User entity.
+    - Fields:
+        - email
+        - displayName
+        - num_wins
+        - num_losses
+        - toatal_victory_margin
+
+ - **UserMiniForm**
+    - Used to display updateable information about a User entity
+    - Fields:
+        - displayName
+
  - **GameForm**
-    - Representation of a Game's state (urlsafe_key, attempts_remaining,
-    game_over flag, message, user_name).
+    - Representation of a Game's state
+    - Fields:
+        - urlsafe_key
+        - total_rounds
+        - remaining_rounds
+        - game_over
+        - user_email
+        - user_name
+        - user_last_move
+        - cpu_last_move
+        - user_won_last_round
+        - total_ties
+        - user_wins
+        - cpu_wins
+
+ - **GameForms**
+    - Multiple GameForm container.
+
  - **NewGameForm**
-    - Used to create a new game (user_name, min, max, attempts)
- - **MakeMoveForm**
-    - Inbound make move form (guess).
+    - Used to create a new game
+    - Fields:
+        - total_rounds
+
+ - **PlayRoundForm**
+    - Inbound form to play a round.
+    - Fields
+        - move
+
+ - **RoundHistoryForm**
+    - Summarizes an already completed round.
+    - Fields:
+        - user_move
+        - cpu_move
+        - user_won
+        - is_tie
+
+ - **GameHistoryForm**
+    - Multiple RoundHistoryForm container
+
+ - **GameMove**
+    - Enumeration for a Rock-Paper-Scissors game move
+    - Fields:
+        - ROCK
+        - PAPER
+        - SCISSORS
+
  - **ScoreForm**
-    - Representation of a completed game's Score (user_name, date, won flag,
-    guesses).
+    - Representation of a completed game's Score.
+    - Fields:
+        - user_email
+        - user_name
+        - date
+        - won
+        - victory_margin
+
  - **ScoreForms**
     - Multiple ScoreForm container.
+
+- **UserRankForm**
+    - Representation of individual user ranking information.
+    - Fields:
+        - email
+        - displayName
+        - total_victory_margin
+
+- **UserRankForms**
+    - Multiple UserRankForm container.
+
  - **StringMessage**
     - General purpose String container.
+
+
+##Cron Jobs:
+
+ - **Email Notifications**
+    - SendReminderEmail
+        - Implemented in: main.py
+        - Configured in: cron.yaml
+        - Description: Sends a reminder email to each User with incomplete active games.
+        Called every day at 8:00PM ET using a cron job.
