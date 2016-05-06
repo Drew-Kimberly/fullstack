@@ -1,2 +1,30 @@
-- How to break up game-logic, models, and endpoint definitions
-- Decision to use OAuth2 authentication throughout
+I was able to construct my Rock-Paper-Scissors (RPS) game using just the User, Score, and Game models. Let's start with
+the User model. I made the decision to use Google+ OAuth2 authentication throughout the entire application. None of
+the endpoints are accessible unless you are authenticated. This decision impacted how I wanted to model my User entities.
+I went with a design similar to that of the toy Conference Central App I built throughout the course. Essentially,
+my unique identifier for each user was the email address registered to their Google+ account - which worked just fine.
+I then added an additional displayName property which was editable by the user. Looking back, for the purpose of the app
+I think I prefer the approach introduced in the Guess-A-Number sample project in that OAuth2 is not incorporated and
+a user has the option to make their own unique username. I also decided to include some game statistics directly
+associated with the user within the User entity model. This was done to fuel the get_user_rankings endpoint
+implementation. I'm not a big fan of this decision. It does the trick for such a small app, but if app increased in
+complexity I think I would want to split user statistics and user information into separate Models.
+
+In terms of modelling game state and game score data, the Game and Score entity models are very straightforward.
+I didn't struggle very much deciding on the fields necessary to model my RPS game, and as I moved forwards with
+additional feature development, it was very easy to extend my models to implement the required functionality. What did
+spark my interest was the separation of code and logic across the application. I put in some effort to make the code
+base easier to maintain/extend, and think it's a big improvement from the Guess-A-Number baseline. However, it still
+needs a lot of work and I'd be very curious to learn how a huge production GAE Endpoints codebase is structured and
+organized. As you can see, I broke up the models.py file such that each model definition has their own file under a
+parent 'models' directory. I took all form classes and moved them to a dedicated api_forms.py file. I suppose that this
+file can be broken up and organized further, but since there really isn't any logic there it's not a must-have for a
+small app. The issue that bugged me the most was how originally, all the game logic was stuffed into the api endpoint
+definitions. My Conference Central api.py was a horrifying mess. For the RPS app, I wanted the api.py file only to
+declare endpoint definitions and invoke calls that would handle the logic. For this project, my game logic is stuffed
+into the Entity models, which is definitely not very good. I know the models should simple define the data schema and
+leave any application logic up to middle-tier handlers/controllers. But that's the thing, there really was no
+middle-tier options presented in the course or the sample projects to leverage in my own application. So, I guess
+my biggest struggle was wanting a good place to implement game logic, while keeping the api endpoint and Entity model
+definitions separate.
+
