@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="../static/js/libraries/jquery-2.2.2.min.js"></script>
+    <link type="text/css" href="../static/css/libraries/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/js/libraries/bootstrap.min.js"></script>
+    <link type="text/css" href="../static/css/catalog.css" rel="stylesheet">
+    <script type="text/javascript" src="../static/js/master.js"></script>
+    <script type="text/javascript" src="../static/js/catalog/catalog.js"></script>
+</head>
+<body>
+
+    {% include "partials/header.html" %}
+
+    <div class="content">
+        <div class="container-fluid">
+
+            <div id="categoriesContainer" class="col-md-3">
+                <h2 id="categoriesHeader">
+                    Categories
+                    {% if session['username'] %}
+                        <button type="button" class="btn btn-primary btn-circle btn-add btn-add-category"
+                            data-toggle="modal" data-target="#addCategory" data-add="confirmAddCategory">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        </button>
+                    {% endif %}
+                </h2>
+                <div class="viewAllWrapper">
+                    <a href="#" id="viewAllCategories">View All</a>
+                </div>
+                {% include "partials/catalog_categories.html" %}
+            </div>
+            <div id="items-top">
+                {% if session['username'] %}
+                    <button type="button" class="btn btn-primary btn-add btn-add-item"
+                            data-toggle="modal" data-target="#addItem" data-add="confirmAddItem"
+                            {% if not categories %} style="display: none" {% endif %}>
+                        New Item
+                    </button>
+                {% endif %}
+            </div>
+            <div id="itemsContainer" class="col-md-9">
+                {% include "partials/catalog_items.html" %}
+            </div>
+
+        </div>
+    </div>
+
+
+    {######################
+    Modals
+    #######################}
+    <div id="addCategory" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Add Category</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/addcategory.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success add-confirm" id="confirmAddCategory" data-dismiss="modal">
+                        Add Category
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editCategory" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Edit Category</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/editcategory.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success edit-confirm" id="confirmEditCategory" data-dismiss="modal">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteCategory" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Delete Category</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/deletecategory.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-danger delete-confirm" id="confirmDeleteCategory" data-dismiss="modal">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Add Item</h3>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm"></form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success add-confirm" id="confirmAddItem" data-dismiss="modal">
+                        Add Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Edit Item</h3>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm"></form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success add-confirm" id="confirmEditItem" data-dismiss="modal">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>Delete Item</h3>
+                </div>
+                <div class="modal-body">
+                    {% include "partials/deleteitem.html" %} </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button class="btn btn-danger delete-confirm" id="confirmDeleteItem" data-dismiss="modal">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewItem" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        <i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                    <h3>View Item</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="viewItemContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<div id="items" class="col-md-9">
+    {% if items %}
+    <ul>
+        {% for item in items %}
+        <li data-categoryid="{{ item.category.category_id }}">
+            <div class="listItemImageLinkWrapper">
+                <div class="listItemWrapper">
+                    <a class="itemLink" href="#" data-itemid="{{ item.item_id }}">
+                        {% if item.image_id %}
+                        <img class="itemThumbnailImage"
+                             src="../../static/img/{{ item.image_id }}{{ item.image.extension }}?dt={{ item.last_updated }}" />
+                        {% else %}
+                        <div class="itemThumbnailNoImage">
+                            <i class="glyphicon glyphicon-camera noImageIcon"></i>
+                        </div>
+                        {% endif %}
+                        <div class="mask">
+                            <p>{{ item.description|truncate(65) }}</p>
+                            <button type="button" class="btn btn-primary btn-sm btnViewItem"
+                                    data-toggle="modal" data-target="#viewItem">View</button>
+                            {% if session['username'] and item.user_id == session['user_id'] %}
+                                <a class="itemIcon btn-delete" href="#" data-toggle="modal"
+                                        data-target="#deleteItem">
+                                    <i class="glyphicon glyphicon-remove"></i>
+                                </a>
+                                <a class="itemIcon btn-edit" href="#" data-toggle="modal"
+                                        data-target="#editItem">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                <span class="itemNameLabel">
+                        {{ item.name|truncate(30) }}
+                </span>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div id="noItems">
+        <span>There are no items available for this category.</span>
+    </div>
+    {% endif %}
+</div>

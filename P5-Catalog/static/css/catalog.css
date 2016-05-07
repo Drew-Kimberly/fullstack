@@ -1,0 +1,606 @@
+body {
+    padding-top: 100px;
+    background-color: #DDDDDD;
+}
+
+#header {
+    background-color: #001f3f;
+}
+
+#header a {
+    color: #DDDDDD;
+    font-weight: bolder;
+}
+
+#header .container {
+    width: 100%;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.container-fluid {
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.modal-header {
+    background-color: #001f3f;
+    color: #DDDDDD !important;
+}
+.modal-header h3 {
+    font-weight: bolder;
+    padding-left: 12px;
+}
+.modal-header .close {
+    height: 60px;
+    width: 60px;
+    margin: 0;
+    color: #DDDDDD;
+}
+
+.modal-footer {
+    background-color: #DDDDDD;
+}
+
+.alert-container {
+    display: none;
+}
+
+
+/**************
+Buttons
+***************/
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.42857149;
+    border-radius: 15px;
+}
+
+.btn-circle.btn-lg {
+    width: 50px;
+    height: 50px;
+    padding: 10px 16px;
+    font-size: 30px;
+    line-height: 1.33;
+    border-radius: 25px;
+}
+
+.btn-add-category {
+    margin-left: .5em;
+}
+
+.btn-add-item {
+    float: right;
+    margin-right: 5em;
+}
+
+
+
+/******************
+Authentication
+******************/
+#loginLink, #logoutLink {
+    font-size: 16px;
+}
+#logoutLink {
+    padding-left: 10px;
+}
+#loginWrapper {
+    float: right;
+    margin-right: 20px;
+}
+#loginLink:hover {
+    text-decoration: none;
+    color: #CCCCCC;
+}
+
+.profImageWrapper {
+    float: left;
+    margin-top: 5.5%;
+}
+.profImage {
+    max-width: 32px;
+    max-height: 32px;
+    height: auto;
+    width: auto;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+}
+
+#signinContainer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    background-color: #CCCCCC;
+    min-width: 20%;
+    min-height: 20%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -webkit-border-radius: 10px;
+    -moz-border-radius:10px;
+    border-radius:10px;
+}
+
+#signInHeader {
+    color: #001f3f;
+    font-weight: bold;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    border-bottom: solid 1px darkgray;
+}
+
+#signInDescription {
+    color: #001f3f;
+    text-align: center;
+    padding-top: 10px;
+}
+
+#signInBtnContainer {
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+#signInBtns {
+    display: inline-block;
+    text-align: left;
+}
+
+
+
+
+/******************
+Categories
+******************/
+#categoriesContainer {
+    border-right: solid #888888;
+}
+
+#categories {
+    white-space: nowrap;
+    padding-top: 25px;
+    width: 100%;
+}
+
+#noCategories {
+    font-style: italic;
+}
+
+/*
+ Categories List Styling
+ Adapted from http://designshack.net/articles/css/5-simple-and-practical-css-list-styles-you-can-copy-and-paste/
+*/
+#categoriesContainer #categories {
+    width: 100%;
+}
+
+#categoriesContainer h2 {
+    font: 400 40px/1.5 Helvetica, Verdana, sans-serif;
+    margin: 0 0 8px 0;
+    padding: 0;
+    color: #001f3f;
+}
+
+#viewAllCategories {
+    font: 200 16px/1.5 Helvetica, Verdana, sans-serif;
+    text-decoration: none;
+    font-size: 16px;
+    color: #43ac6a;
+}
+.viewAllWrapper {
+    display: inline-block;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-radius: 5px 5px 5px 5px;
+    margin-left: 15px;
+}
+.viewAllWrapper:hover {
+    background: #CCCCCC;
+}
+
+#categoriesContainer ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+}
+
+#categoriesContainer li {
+    font: 200 16px/1.5 Helvetica, Verdana, sans-serif;
+    padding-bottom: .5em;
+}
+
+#categoriesContainer li:last-child {
+    border: none;
+}
+
+#categoriesContainer .categoryLink {
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bolder;
+    color: #43ac6a;
+    width: 200px;
+}
+
+.categoryWrapper {
+    display: inline-block;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-radius: 5px 5px 5px 5px;
+}
+
+#categoriesContainer .categoryWrapper:hover{
+    /*font-size: 16px;*/
+    background: #CCCCCC;
+}
+#categoriesContainer .categoryWrapper:hover .categoryIcon {
+    display: inline-block;
+}
+
+#categoriesContainer .categoryLink:hover, #viewAllCategories:hover {
+    color: #358753;
+}
+
+.categoryIcon {
+    font-size:small !important;
+    display: none;
+}
+.btn-edit{
+    color: steelblue !important;
+}
+.categoryIcon.btn-edit {
+    margin-left: 25px;
+}
+.btn-edit:hover {
+    color: #58A2FF !important;
+    cursor: pointer;
+}
+.btn-delete {
+    color: firebrick !important;
+}
+.categoryIcon.btn-delete {
+    margin-left:3px;
+}
+.btn-delete:hover {
+    color: #FF3232 !important;
+    cursor: pointer;
+}
+
+.activeCategory {
+    background: #CCCCCC;
+}
+
+/**************************************
+Items
+**************************************/
+#itemsContainer {
+    height: 100%;
+}
+
+#items-top {
+    width: 70%;
+    margin-bottom: 15px;
+    height: auto;
+    float: right;
+}
+
+#items {
+    width: 100%;
+    margin: 0 auto;
+    overflow: auto;
+}
+
+#items ul {
+    list-style-type: none;
+}
+
+#items li {
+    width: 260px;
+    height: 210px;
+    float: left;
+    margin-bottom: 20px;
+}
+
+#items .listItemWrapper {
+    width: 200px;
+    position: relative;
+    background-color: #D9D9D9;
+}
+
+#items a.itemLink:hover {
+    text-decoration: none;
+    cursor: default;
+}
+
+#items li span {
+    margin: 0 auto;
+    width: 50%;
+    text-align: center;
+    color: #43ac6a;
+    padding-top: 5px;
+}
+
+#items li, #items li img, #items li span {
+    display: block;
+}
+
+.itemIcon {
+    display: none !important;
+}
+.itemIcon.btn-delete {
+    margin-right: 3px;
+    margin-left: 7px;
+}
+
+.previewImage {
+    width: auto;
+    height: auto;
+    max-width: 400px;
+    max-height: 250px;
+    display: block;
+    margin: auto;
+}
+
+.itemThumbnailImage {
+    width: auto;
+    height: auto;
+    max-width: 200px;
+    max-height: 150px;
+    display: block;
+    margin: auto;
+}
+.itemThumbnailNoImage {
+    width: 200px;
+    height: 150px;
+    display: block;
+    margin: auto;
+    border: medium dashed #C5C5C5;
+}
+.noImageIcon {
+    font-size: 46px;
+    color: #C5C5C5;
+    margin: 27% 38.5% 27% 38.5%
+}
+
+/*Hover effect adapted from:*/
+/*http://tympanus.net/codrops/2011/11/02/original-hover-effects-with-css3/*/
+#items img, #items .itemThumbnailNoImage {
+    -webkit-transition: all 0.2s linear;
+    -moz-transition: all 0.2s linear;
+    -ms-transition: all 0.2s linear;
+    -o-transition: all 0.2s linear;
+    transition: all 0.2s linear;
+}
+.listItemImageLinkWrapper {
+    width: 200px;
+    top: 0;
+    left: 0;
+    text-align: center;
+}
+.listItemWrapper .mask {
+    width: 200px;
+    max-height: 150px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: absolute;
+    text-align: center;
+    opacity: 0;
+    background-color: rgba(200, 200, 200, 0.8);
+    -webkit-transition: all 0.4s ease-in-out;
+    -moz-transition: all 0.4s ease-in-out;
+    -ms-transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+.mask p {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 12px;
+    position: absolute;
+    color: #fff;
+    padding: 0 20px;
+    text-align: center;
+    top: 15%;
+    left: 8%;
+    right: 8%;
+    opacity: 0;
+    -webkit-transform: translateY(100px);
+    -moz-transform: translateY(100px);
+    -ms-transform: translateY(100px);
+    -o-transform: translateY(100px);
+    transform: translateY(100px);
+    -webkit-transition: all 0.2s linear;
+    -moz-transition: all 0.2s linear;
+    -ms-transition: all 0.2s linear;
+    -o-transition: all 0.2s linear;
+    transition: all 0.2s linear;
+}
+.mask .btnViewItem {
+    display: inline-block;
+    padding: 7px 14px;
+    color: #fff;
+    position: absolute;
+    bottom: 12%;
+    left: 33%;
+    opacity: 0;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+}
+.listItemWrapper:hover a.itemLink {
+    -webkit-transform: scale(1.1);
+    -moz-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    -o-transform: scale(1.1);
+    transform: scale(1.1);
+}
+.listItemWrapper:hover .mask {
+    opacity: 1;
+}
+.listItemWrapper:hover p,
+.listItemWrapper:hover .btnViewItem {
+    opacity: 1;
+    -webkit-transform: translateY(0px);
+    -moz-transform: translateY(0px);
+    -ms-transform: translateY(0px);
+    -o-transform: translateY(0px);
+    transform: translateY(0px);
+}
+.listItemWrapper:hover p {
+    -webkit-transition-delay: 0.1s;
+    -moz-transition-delay: 0.1s;
+    -ms-transition-delay: 0.1s;
+    -o-transition-delay: 0.1s;
+    transition-delay: 0.1s;
+}
+.listItemWrapper:hover a.itemIcon {
+    display: inline-block !important;
+    float: right;
+}
+
+#noItems {
+    display:inline-block;
+    vertical-align: middle;
+}
+#noItems span {
+    font-style: italic;
+}
+
+.imageContainer {
+    max-width: 500px;
+    max-height: 250px;
+    margin-top: 20px;
+}
+.imageContainer.noImage {
+    border: medium dashed lightgray;
+}
+.itemImage {
+    max-width: 100%;
+    height: auto;
+}
+#newItemForm #itemImageUpload, #editItemForm #itemImageUpload {
+    margin: auto;
+    width: 60%;
+    padding-top: 75px;
+    padding-bottom: 75px;
+}
+
+.itemCategory, .itemName {
+    padding-top: 15px;
+}
+
+#itemDescription {
+    height: 150px;
+}
+
+.editImgOptions {
+    display: inline-block;
+}
+
+.editImgOptionsWrapper {
+    text-align: center;
+}
+
+#newItemForm .editImgOptionsWrapper {
+    display: none;
+}
+
+.deleteImage {
+    font-size: 12px;
+    color: firebrick;
+    margin-left: 5px;
+}
+.deleteImage:hover {
+    text-decoration: none;
+    color: #FF3232;
+}
+
+#updateImageUpload {
+    width: 0.01em;
+	height: 0.01em;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+#updateImageUpload + label {
+    display: inline-block;
+    color: steelblue;
+    margin-right: 5px;
+}
+#updateImageUpload + label:hover {
+    color: #58A2FF;
+    cursor: pointer;
+}
+
+.viewItemImageContainer {
+    max-width: 500px;
+    max-height: 350px;
+    margin: 5% auto 2.5%;
+}
+.viewItemImage {
+    width: auto;
+    height: auto;
+    max-width: 500px;
+    max-height: 350px;
+    display: block;
+    margin: auto;
+}
+
+.viewItemName {
+    color: #001f3f;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.viewItemCategory {
+    color: #001f3f;
+    text-align: center;
+    font-size: 18px;
+}
+
+.viewItemCreatedByWrapper {
+    color: #001f3f;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 24px !important;
+}
+
+.viewItemDescriptionWrapper {
+    text-align: center;
+    border: solid thin lightgrey;
+    padding: 5px;
+}
+.viewItemDescription {
+    color: #001f3f;
+    margin-top: 10.5px;
+}
+
+.viewItemNoImage {
+    width: 400px;
+    height: 250px;
+    margin: 5% auto 2.5%;
+    text-align: center;
+    background-color: #EFEFEF;
+    color: #cccccc;
+}
+.viewItemNoImageIcon {
+    font-size: 50px;
+}
+
+.viewItemNoImageText {
+    display: inline-block;
+    margin: 82px 0;
+}
+
