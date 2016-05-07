@@ -31,6 +31,12 @@ Once the user wins/loses, the round is over and the round result is recorded.
 If an overall game winner has not been established, the players begin another round,
 and keep doing so until the game is completed.
 
+The application saves and associates the result of each game with the participating
+user to maintain an overall Win/Loss record. The margin of victory is also saved
+for every game. User's overall margin of victory is the metric used to rank
+the users in the system against eachother. The greater your margin of victory,
+the better your rank in the system.
+
 The application allows many different users to play many different Rock Paper Scissor
 games simultaneously. Users have the ability to view round-by-round results of their
 own completed or active games using the `get_game_history` endpoint. Users can also
