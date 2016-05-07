@@ -4,11 +4,7 @@ used by the Rock Paper Scissors application.
 """
 
 from google.appengine.ext import ndb
-from models.User import User
-from api_forms import ScoreForm, ScoreForms, UserRankForm
-from utils import get_endpoints_current_user
-from endpoints.api_exceptions import NotFoundException
-from endpoints.api_exceptions import BadRequestException
+from protorpc import messages
 
 
 class Score(ndb.Model):
@@ -18,59 +14,26 @@ class Score(ndb.Model):
     won = ndb.BooleanProperty(required=True)
     victory_margin = ndb.IntegerProperty(required=True)
 
-    @classmethod
-    def get_scores(cls):
-        """Returns all Scores existing within the application."""
-        # Check that user is authenticated
-        get_endpoints_current_user()
-
-        scores = Score.query()
-        return ScoreForms(scores=[cls._to_form(score) for score in scores])
-
-    @classmethod
-    def get_user_scores(cls, request):
-        """Returns all Scores associated with the current signed-in User"""
-        # Check that current user is authenticated
-        get_endpoints_current_user()
-
-        user = User.query(User.email == request.email).get()
-        if not user:
-            raise NotFoundException(
-                'A User with that email address does not exist!')
-
-        scores = Score.query(Score.user == user.key)
-        return ScoreForms(scores=[cls._to_form(score) for score in scores])
-
-    @classmethod
-    def get_high_scores(cls, request):
-        """
-        Returns a list of highscores. The scores are ordered
-        in descending order by the margin of victory. In the request,
-        the user can specify 'number_of_results' to limit the total
-        number of scores returned
-        """
-        # Check that the current user is authenticated
-        get_endpoints_current_user()
-
-        # Get number_of_results limit from request
-        number_of_results = request.number_of_results
-
-        if number_of_results < 0:
-            raise BadRequestException("Number of results field must be greater than 0!")
-        elif number_of_results == 0:
-            scores = Score.query().order(-Score.victory_margin)
-        else:
-            scores = Score.query().order(-Score.victory_margin).fetch(number_of_results)
-
-        return ScoreForms(scores=[cls._to_form(score) for score in scores])
-
-    @staticmethod
-    def _to_form(score):
+    def to_form(self):
         """Converts a Score ndb instance into a ScoreForm RPC message"""
         return ScoreForm(
-            user_email=score.user.get().email,
-            user_name=score.user.get().displayName,
-            won=score.won,
-            date=str(score.date),
-            victory_margin=score.victory_margin
+            user_email=self.user.get().email,
+            user_name=self.user.get().displayName,
+            won=self.won,
+            date=str(self.date),
+            victory_margin=self.victory_margin
         )
+
+
+class ScoreForm(messages.Message):
+    """ScoreForm for outbound Score information"""
+    user_email = messages.StringField(1, required=True)
+    user_name = messages.StringField(2, required=True)
+    date = messages.StringField(3, required=True)
+    won = messages.BooleanField(4, required=True)
+    victory_margin = messages.IntegerField(5, required=True)
+
+
+class ScoreForms(messages.Message):
+    """Return multiple ScoreForm's"""
+    scores = messages.MessageField(ScoreForm, 1, repeated=True)

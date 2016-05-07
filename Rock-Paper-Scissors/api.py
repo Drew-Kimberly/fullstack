@@ -5,20 +5,13 @@ move game logic to another file. Ideally the API will be simple, concerned
 primarily with communication to/from the API's users."""
 
 
-import endpoints
-
 from protorpc import remote
-from protorpc import messages
 from protorpc import message_types
 
-from google.appengine.api import memcache
-from google.appengine.api import taskqueue
+from handlers.GameHandler import *
+from handlers.UserHandler import *
+from handlers.ScoreHandler import *
 
-from models.User import *
-from models.Game import *
-from models.Score import *
-
-from api_forms import NewGameForm, PlayRoundForm, StringMessage, UserMiniForm, GameForms, GameHistoryForm
 from settings import WEB_CLIENT_ID
 
 
@@ -54,7 +47,7 @@ class RockPaperScissorsApi(remote.Service):
     def save_user(self, request):
         """Creates a new user profile if the sign in email does not exist in the system.
         Otherwise, updates the user profile's information if there is a change."""
-        return User.do_user_profile(request)
+        return UserHandler.do_user_profile(request)
 
     @endpoints.method(request_message=message_types.VoidMessage,
                       response_message=UserForm,
@@ -63,7 +56,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_user(self, request):
         """Returns the current User profile."""
-        return User.do_user_profile()
+        return UserHandler.do_user_profile()
 
     @endpoints.method(request_message=NewGameForm,
                       response_message=GameForm,
@@ -72,12 +65,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='POST')
     def new_game(self, request):
         """Creates a new Rock-Paper-Scissors game"""
-
-        # Use a task queue to update the average attempts remaining.
-        # This operation is not needed to complete the creation of a new game
-        # so it is performed out of sequence.
-        # taskqueue.add(url='/tasks/cache_average_attempts')
-        return Game.new_game(request)
+        return GameHandler.new_game(request)
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
@@ -86,7 +74,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_game(self, request):
         """Return the current game state."""
-        return Game.get_game(request)
+        return GameHandler.get_game(request)
 
     @endpoints.method(request_message=PLAY_ROUND_REQUEST,
                       response_message=GameForm,
@@ -95,7 +83,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='PUT')
     def play_round(self, request):
         """Plays a round. Returns a game state"""
-        return Game.play_round(request)
+        return GameHandler.play_round(request)
 
     @endpoints.method(response_message=ScoreForms,
                       path='scores',
@@ -103,7 +91,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_scores(self, request):
         """Return all scores"""
-        return Score.get_scores()
+        return ScoreHandler.get_scores()
 
     @endpoints.method(request_message=GET_USER_SCORES_REQUEST,
                       response_message=ScoreForms,
@@ -112,7 +100,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_user_scores(self, request):
         """Returns all of the given User's scores"""
-        return Score.get_user_scores(request)
+        return ScoreHandler.get_user_scores(request)
 
     @endpoints.method(request_message=message_types.VoidMessage,
                       response_message=GameForms,
@@ -121,7 +109,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_user_games(self, request):
         """Returns all of the currently authenticated User's games"""
-        return Game.get_user_games()
+        return GameHandler.get_user_games()
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=StringMessage,
@@ -130,7 +118,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='DELETE')
     def cancel_game(self, request):
         """Cancels an active game. The game must belong to current user."""
-        Game.cancel_game(request)
+        GameHandler.cancel_game(request)
         return StringMessage(message='The game has been successfully cancelled!')
 
     @endpoints.method(request_message=GET_HIGHSCORES_REQUEST,
@@ -140,7 +128,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_high_scores(self, request):
         """Returns a list of High Scores."""
-        return Score.get_high_scores(request)
+        return ScoreHandler.get_high_scores(request)
 
     @endpoints.method(request_message=message_types.VoidMessage,
                       response_message=UserRankForms,
@@ -149,7 +137,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_user_rankings(self, request):
         """Returns a list of User Rankings, ordered by their total margin of victory."""
-        return User.get_user_rankings(request)
+        return UserHandler.get_user_rankings(request)
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameHistoryForm,
@@ -158,7 +146,7 @@ class RockPaperScissorsApi(remote.Service):
                       http_method='GET')
     def get_game_history(self, request):
         """Returns the round-by-round result of an active or completed Game."""
-        return Game.get_game_history(request)
+        return GameHandler.get_game_history(request)
 
 
 api = endpoints.api_server([RockPaperScissorsApi])
