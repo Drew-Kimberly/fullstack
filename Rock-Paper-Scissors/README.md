@@ -49,14 +49,16 @@ can be retrieved or played by using the path parameter `urlsafe_game_key`.
 
 ##Files Included:
  - api.py: Contains all endpoints for the application.
- - api_forms.py: Contains message definitions for representing game data.
  - app.yaml: App configuration.
  - settings.py: User configuration settings.
  - cron.yaml: Cronjob configuration.
  - main.py: Handler for taskqueue handler.
- - Game.py: Definition for Game entity and related application logic.
- - Score.py: Definition for Score entity and related application logic.
- - User.py: Definition for User entity and related application logic.
+ - Game.py: Definition for Game entity.
+ - Score.py: Definition for Score entity.
+ - User.py: Definition for User entity.
+ - GameHandler.py: Service class containing the game logic pertinent to the Game entity.
+ - ScoreHandler.py: Service class containing the game logic pertinent to the Score entity.
+ - UserHanlder.py: Service class containing the game logic pertinent to the User entity.
  - utils.py: Helper functions used across the application.
 
 
