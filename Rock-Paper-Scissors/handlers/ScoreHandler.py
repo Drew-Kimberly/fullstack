@@ -5,9 +5,9 @@ the Score entity.
 """
 
 
-from models.User import *
-from utils import *
-from models.Score import *
+from models.User import User
+from utils import get_endpoints_current_user
+from models.Score import Score, ScoreForms
 from endpoints.api_exceptions import BadRequestException, NotFoundException
 
 

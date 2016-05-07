@@ -2,7 +2,6 @@
 This file contains the class definition for the Game datastore entity,
 used by the Rock Paper Scissors application.
 """
-from __builtin__ import classmethod
 
 from protorpc import messages
 from google.appengine.ext import ndb
@@ -102,16 +101,9 @@ class GameHistoryForm(messages.Message):
     game_history = messages.MessageField(RoundHistoryForm, 1, repeated=True)
 
 
-class GameMove(messages.Enum):
-    """GameMove -- RPS move enumeration value"""
-    ROCK = 1
-    PAPER = 2
-    SCISSORS = 3
-
-
 class PlayRoundForm(messages.Message):
     """Used to make a move in an existing game"""
-    move = messages.EnumField('GameMove', 1, required=True)
+    move = messages.StringField(1, required=True)
 
 
 class StringMessage(messages.Message):

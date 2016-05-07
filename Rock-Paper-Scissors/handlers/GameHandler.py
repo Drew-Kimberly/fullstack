@@ -6,11 +6,13 @@ the Game entity.
 
 
 import random
+import endpoints
+from google.appengine.ext import ndb
 from datetime import date
-from models.Score import *
-from models.User import *
-from utils import *
-from models.Game import *
+from models.Score import Score
+from models.User import User
+from utils import get_by_urlsafe, get_endpoints_current_user
+from models.Game import Game, GameForms
 
 
 ROUNDS_OPTIONS = [1, 3, 5, 7]
@@ -31,7 +33,7 @@ class GameHandler(object):
 
         if request.total_rounds not in ROUNDS_OPTIONS:
             raise endpoints.BadRequestException('Invalid total number of rounds.'
-                                                ' Must be an odd number in the set [1,7].')
+                                                ' Must be a number contained in the set: {0}.'.format(ROUNDS_OPTIONS))
 
         game = Game(user=user.key, total_rounds=request.total_rounds, remaining_rounds=request.total_rounds)
         game.put()
@@ -113,23 +115,21 @@ class GameHandler(object):
         game.cpu_moves.append(cpu_move)
 
         # Game logic to determine winner
-        user_move = request.move.name
+        user_move = request.move.upper()
+        if user_move not in MOVES:
+            raise endpoints.BadRequestException('Player moves must be contained in the set: {0}.'.format(MOVES))
+
         game.user_moves.append(user_move)
 
         is_tie = False
-        if cpu_move == user_move:
+        user_move_idx = MOVES.index(user_move)
+        cpu_move_idx = MOVES.index(cpu_move)
+
+        if user_move_idx == cpu_move_idx:
             is_tie = True
             game.user_won_last_round = None
             game.round_results.append(-1)
-        elif user_move == "ROCK" and cpu_move == "SCISSORS":
-            game.user_wins += 1
-            game.user_won_last_round = True
-            game.round_results.append(1)
-        elif user_move == "PAPER" and cpu_move == "ROCK":
-            game.user_wins += 1
-            game.user_won_last_round = True
-            game.round_results.append(1)
-        elif user_move == "SCISSORS" and cpu_move == "PAPER":
+        elif (3 + user_move_idx - cpu_move_idx) % 3 == 1:
             game.user_wins += 1
             game.user_won_last_round = True
             game.round_results.append(1)

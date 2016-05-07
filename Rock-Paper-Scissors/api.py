@@ -5,12 +5,16 @@ move game logic to another file. Ideally the API will be simple, concerned
 primarily with communication to/from the API's users."""
 
 
-from protorpc import remote
-from protorpc import message_types
+import endpoints
+from protorpc import remote, messages, message_types
 
-from handlers.GameHandler import *
-from handlers.UserHandler import *
-from handlers.ScoreHandler import *
+from handlers.GameHandler import GameHandler
+from handlers.UserHandler import UserHandler
+from handlers.ScoreHandler import ScoreHandler
+
+from models.Game import GameForm, GameForms, GameHistoryForm, NewGameForm, PlayRoundForm, StringMessage
+from models.User import UserForm, UserMiniForm, UserRankForms
+from models.Score import ScoreForms
 
 from settings import WEB_CLIENT_ID
 

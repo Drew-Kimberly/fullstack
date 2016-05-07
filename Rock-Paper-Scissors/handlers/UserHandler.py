@@ -5,7 +5,8 @@ the User entity.
 """
 
 
-from models.User import *
+from google.appengine.ext import ndb
+from models.User import User, UserRankForms
 from utils import get_endpoints_current_user
 
 
