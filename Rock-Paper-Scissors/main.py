@@ -17,7 +17,9 @@ class SendReminderEmail(webapp2.RequestHandler):
         users = []
 
         for game in games:
-            users.append(game.user.get())
+            user = game.user.get()
+            if user not in users:  # Limit emails to 1 per user per day
+                users.append(user)
 
         for user in users:
             subject = 'This is a reminder!'
